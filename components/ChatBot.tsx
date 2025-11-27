@@ -1,0 +1,245 @@
+
+import React, { useState, useRef, useEffect } from 'react';
+import { MessageCircle, X, Send, Bot, Phone, Sparkles, User, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { generateAIResponse } from '../services/geminiService';
+import { StorageService } from '../services/storage';
+import { COMPANY_INFO, Lead } from '../types';
+
+interface MessageAction {
+  label: string;
+  type: 'phone' | 'whatsapp' | 'link';
+  value: string;
+  icon?: any;
+}
+
+interface Message {
+  id: number;
+  text: string;
+  sender: 'user' | 'bot';
+  actions?: MessageAction[];
+}
+
+type ConversationStep = 'idle' | 'name' | 'phone';
+
+const ChatBot: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    { 
+      id: 1, 
+      text: `שלום! אני העוזר הדיגיטלי של ${COMPANY_INFO.owner}. כאן לשירותך 24/7.`, 
+      sender: 'bot',
+      actions: [
+        { label: 'חייג לדדי', type: 'phone', value: COMPANY_INFO.phone, icon: Phone },
+        { label: 'וואטסאפ', type: 'whatsapp', value: COMPANY_INFO.phone, icon: MessageCircle }
+      ]
+    }
+  ]);
+  const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  
+  // Lead Capture State
+  const [conversationStep, setConversationStep] = useState<ConversationStep>('idle');
+  const [leadData, setLeadData] = useState<{name: string, phone: string}>({ name: '', phone: '' });
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  useEffect(scrollToBottom, [messages]);
+
+  const addBotMessage = (text: string, actions?: MessageAction[]) => {
+    setMessages(prev => [...prev, { id: Date.now(), text, sender: 'bot', actions }]);
+  };
+
+  const saveLeadToCRM = (name: string, phone: string) => {
+    const newLead: Lead = {
+      id: Date.now().toString(),
+      name: name,
+      phone: phone,
+      email: '',
+      date: new Date().toLocaleDateString('he-IL'),
+      distance: 0, rooms: 0, floor: 0, elevator: false, crane: false, packing: false, volume: 0, items: [], quote: 0,
+      status: 'new',
+      source: 'chatbot', // Special source tag
+      createdAt: Date.now(),
+      notes: 'נוצר אוטומטית דרך הצ׳אט בוט'
+    };
+    StorageService.saveLead(newLead);
+  };
+
+  const handleStepLogic = async (text: string) => {
+    // 1. Handling Name Input
+    if (conversationStep === 'name') {
+      setLeadData(prev => ({ ...prev, name: text }));
+      setConversationStep('phone');
+      setTimeout(() => {
+        addBotMessage(`נעים להכיר, ${text}. מה מספר הטלפון שלך לחזרה?`);
+      }, 500);
+      return;
+    }
+
+    // 2. Handling Phone Input
+    if (conversationStep === 'phone') {
+      const phoneRegex = /\b05\d-?\d{7}\b/;
+      if (phoneRegex.test(text) || text.length >= 9) {
+        setLeadData(prev => ({ ...prev, phone: text }));
+        // Save to CRM
+        saveLeadToCRM(leadData.name, text);
+        
+        setConversationStep('idle');
+        setTimeout(() => {
+          addBotMessage("מעולה! שמרתי את הפרטים שלך. דדי יצור איתך קשר בהקדם.", [
+             { label: 'חייג עכשיו', type: 'phone', value: COMPANY_INFO.phone, icon: Phone }
+          ]);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          addBotMessage("המספר נראה לא תקין. אנא נסה שוב (לדוגמה: 050-1234567)");
+        }, 500);
+      }
+      return;
+    }
+
+    // 3. IDLE State - Intent Detection
+    const lowerText = text.toLowerCase();
+    
+    // Check for moving intent triggers
+    if (/הובלה|מעבר|מחיר|הצעת|להזמין|פנוי|מתי|quote|move/.test(lowerText) && conversationStep === 'idle') {
+        setConversationStep('name');
+        setTimeout(() => {
+            addBotMessage("אשמח לעזור לך עם הצעת מחיר! איך קוראים לך?");
+        }, 600);
+        return;
+    }
+
+    // Regex Q&A
+    if (/ביטוח|אחריות/.test(lowerText)) {
+        setTimeout(() => addBotMessage("בוודאי! כל הובלה כוללת ביטוח תכולה מלא עד 100,000 ש״ח."), 600);
+        return;
+    }
+    if (/טלפון|דדי/.test(lowerText)) {
+        setTimeout(() => addBotMessage(`ניתן להשיג את דדי ב-${COMPANY_INFO.phone}.`, [
+            { label: 'חייג', type: 'phone', value: COMPANY_INFO.phone, icon: Phone }
+        ]), 600);
+        return;
+    }
+    if (/אזורים|רעננה/.test(lowerText)) {
+        setTimeout(() => addBotMessage(`אנחנו יושבים ב${COMPANY_INFO.address} ועובדים בכל הארץ.`), 600);
+        return;
+    }
+
+    // AI Fallback
+    const settings = StorageService.getSettings();
+    if (settings.aiApiKey) {
+      try {
+        const aiReply = await generateAIResponse(text);
+        addBotMessage(aiReply);
+      } catch (e) {
+        addBotMessage("מתנצל, יש לי עומס כרגע.");
+      }
+    } else {
+      setTimeout(() => {
+        addBotMessage(`שאלה מעולה. הכי טוב שתדבר עם דדי: ${COMPANY_INFO.phone}`, [
+            { label: 'וואטסאפ', type: 'whatsapp', value: COMPANY_INFO.phone, icon: MessageCircle }
+        ]);
+      }, 800);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+    const userMsg: Message = { id: Date.now(), text: inputValue, sender: 'user' };
+    setMessages(prev => [...prev, userMsg]);
+    setInputValue("");
+    setIsTyping(true);
+
+    await handleStepLogic(inputValue);
+    
+    setIsTyping(false);
+  };
+
+  return (
+    <div className="fixed bottom-24 left-6 z-50 font-sans">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4"
+          >
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
+              <div className="flex items-center gap-2">
+                <Bot className="w-6 h-6 text-white" />
+                <div>
+                    <span className="text-white font-bold block leading-none">העוזר של דדי</span>
+                    <span className="text-blue-200 text-xs">מחובר כעת</span>
+                </div>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900/50">
+              {messages.map(msg => (
+                <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-start' : 'items-end'}`}>
+                  <div className={`max-w-[85%] p-3 rounded-xl text-sm shadow-md ${
+                    msg.sender === 'user' 
+                      ? 'bg-blue-600 text-white rounded-br-none' 
+                      : 'bg-slate-700 text-slate-200 rounded-bl-none border border-white/5'
+                  }`}>
+                    {msg.text}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  {msg.actions && (
+                      <div className="flex gap-2 mt-2">
+                          {msg.actions.map((action, idx) => (
+                              <a 
+                                key={idx}
+                                href={action.type === 'phone' ? `tel:${action.value}` : action.type === 'whatsapp' ? `https://wa.me/972${action.value.replace(/-/g, '').substring(1)}` : action.value}
+                                target={action.type !== 'phone' ? '_blank' : undefined}
+                                rel="noreferrer"
+                                className="flex items-center gap-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs px-3 py-1.5 rounded-full transition-colors"
+                              >
+                                  {action.icon && <action.icon size={12} />}
+                                  {action.label}
+                              </a>
+                          ))}
+                      </div>
+                  )}
+                </div>
+              ))}
+              {isTyping && <div className="text-slate-500 text-xs px-4 animate-pulse">מקליד...</div>}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="p-3 bg-slate-800 border-t border-white/10 flex gap-2">
+              <input 
+                type="text" 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder={conversationStep === 'name' ? 'הקלד את שמך...' : conversationStep === 'phone' ? 'הקלד טלפון...' : "שאל אותי משהו..."}
+                className="flex-1 bg-slate-900 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 outline-none text-right"
+                autoFocus
+              />
+              <button onClick={handleSend} className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg"><Send size={18} /></button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] relative group"
+      >
+        <MessageCircle size={28} />
+        {!isOpen && <span className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full animate-ping"></span>}
+      </motion.button>
+    </div>
+  );
+};
+
+export default ChatBot;
