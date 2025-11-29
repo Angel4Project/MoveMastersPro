@@ -191,6 +191,40 @@ const Blog: React.FC = () => {
 
   useEffect(() => {
     const allPosts = StorageService.getPosts();
+
+    // Add the "Building Digital Empires" post if not exists
+    const buildingEmpiresPost: BlogPost = {
+      id: 'building-digital-empires',
+      title: 'Building Digital Empires',
+      content: `יצירת אתרים ואפליקציות מתקדמות היא האומנות שלי. אני ANGEL4PROJECT, מומחה לפיתוח דיגיטלי שמחבר בין טכנולוגיה לחזון עסקי.
+
+כבר למעלה מ-10 שנים אני בונה פתרונות דיגיטליים מתקדמים שמעצבים את עתיד העסקים. מהאתר הפשוט ביותר ועד למערכות מורכבות עם AI מתקדם, אני מאמין שכל עסק ראוי לפתרון דיגיטלי שישקף את הייחודיות שלו.
+
+האתר של הובלות המקצוען הוא דוגמה מושלמת למה שאני עושה הכי טוב - שילוב של עיצוב מתקדם, חווית משתמש יוצאת דופן, וטכנולוגיה חדשנית. כאן תמצאו:
+
+• עיצוב רספונסיבי מושלם לכל המסכים
+• צ'אט בוט חכם עם AI מתקדם
+• מערכת ניהול לידים CRM משולבת
+• חנות אונליין עם תשלום מאובטח
+• בלוג דינמי עם תוכן איכותי
+• פאנל ניהול מתקדם למנהלים
+
+אם אתם מחפשים בן זוג דיגיטלי שיבנה לכם אתר או אפליקציה שתהפוך את העסק שלכם לאימפריה דיגיטלית, אני כאן בשבילכם.
+
+צרו קשר עכשיו ונתחיל לבנות את העתיד שלכם!`,
+      author: 'ANGEL4PROJECT',
+      date: new Date().toISOString(),
+      image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=800&auto=format&fit=crop',
+      pinned: true,
+      tags: ['פיתוח אתרים', 'אפליקציות', 'טכנולוגיה', 'עסקים', 'AI'],
+      readTime: '5 דקות קריאה'
+    };
+
+    const existingPost = allPosts.find(p => p.id === buildingEmpiresPost.id);
+    if (!existingPost) {
+      allPosts.unshift(buildingEmpiresPost); // Add to beginning as pinned
+    }
+
     setPosts(allPosts);
     setFilteredPosts(allPosts);
   }, []);

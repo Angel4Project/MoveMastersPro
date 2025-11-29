@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Truck, X, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Truck, X, Sparkles, Home } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const WelcomeModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Show only once per session or use localStorage for persistent checking
@@ -25,6 +26,14 @@ const WelcomeModal: React.FC = () => {
   const handleAction = (path: string) => {
     handleClose();
     navigate(path);
+  };
+
+  const handleHomeAction = () => {
+    if (location.pathname !== '/') {
+      handleAction('/');
+    } else {
+      handleClose();
+    }
   };
 
   return (
@@ -98,11 +107,17 @@ const WelcomeModal: React.FC = () => {
                         >
                             <Truck size={18} /> קבל הצעת מחיר
                         </button>
-                        <button 
+                        <button
                             onClick={() => handleAction('/store')}
                             className="bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 transition"
                         >
                              לחנות האריזה
+                        </button>
+                        <button
+                            onClick={handleHomeAction}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-green-900/50"
+                        >
+                            <Home size={18} /> המשך לדף הבית
                         </button>
                     </motion.div>
                 </div>

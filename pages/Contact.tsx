@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StorageService } from '../services/storage';
 import { AppSettings, InventoryItem, Lead } from '../types';
-import { Send, ChevronDown, Check, Package, Home, Truck, Box, UserPlus, Gift, ArrowUp, AlertTriangle, Plus, Monitor, Tv, Minus, Sofa, Armchair, Bed, Table, Utensils, Lamp } from 'lucide-react';
+import { Send, ChevronDown, Check, Package, Home, Truck, Box, UserPlus, Gift, ArrowUp, AlertTriangle, Plus, Monitor, Tv, Minus, Sofa, Armchair, Bed, Table, Utensils, Lamp, Calculator } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 
 // Revolutionary 3D Truck Component - Mobile Optimized
@@ -620,7 +620,10 @@ const Contact: React.FC = () => {
         {/* Mobile-First Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-bold text-white">מחשבון הובלה</span>
+            <div className="flex items-center gap-2">
+              <Calculator size={20} className="text-blue-400" />
+              <span className="text-lg font-bold text-white">מחשבון הצעות מחיר חכם</span>
+            </div>
             <span className="text-sm text-slate-400">שלב {currentStep} מתוך 4</span>
           </div>
 

@@ -13,6 +13,8 @@ const About = React.lazy(() => import('./pages/About'));
 const Store = React.lazy(() => import('./pages/Store'));
 const Blog = React.lazy(() => import('./pages/Blog'));
 const AdminPanel = React.lazy(() => import('./pages/AdminPanel'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
 
 import ChatBot from './components/ChatBot';
 import Header from './components/Header';
@@ -356,11 +358,19 @@ const Footer = () => {
               <p className="text-xs text-slate-600 mt-1">
                 בנוי עם ❤️ בישראל
               </p>
+              <div className="flex gap-4 mt-2 text-xs">
+                <Link to="/privacy-policy" className="text-slate-500 hover:text-blue-400 transition-colors">
+                  מדיניות פרטיות
+                </Link>
+                <Link to="/terms-of-service" className="text-slate-500 hover:text-blue-400 transition-colors">
+                  תנאי שימוש
+                </Link>
+              </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-500">פותח על ידי</span>
-              <motion.a 
+              <motion.a
                 href="https://Angel0S-WEB.vercel.app"
                 target="_blank"
                 rel="noreferrer"
@@ -431,7 +441,7 @@ const AppContent: React.FC = () => {
               <Route path="/quote" element={
                 <div className="admin-content-padding">
                   <SEOHead
-                    title="הזמנת הצעת מחיר - הובלות המקצוען"
+                    title="מחשבון הצעות מחיר חכם - הובלות המקצוען"
                     description="קבל הצעת מחיר מיידית להובלת דירה או משרד. חישוב מדויק לפי מיקום, גודל ודרישות מיוחדות."
                     keywords={['הצעת מחיר', 'הובלות', 'מחירון', 'חישוב', 'דדי']}
                   />
@@ -476,6 +486,26 @@ const AppContent: React.FC = () => {
                     keywords={['ניהול', 'פאנל', 'לידים', 'CRM', 'סטטיסטיקות']}
                   />
                   <AdminPanel />
+                </div>
+              } />
+              <Route path="/privacy-policy" element={
+                <div className="admin-content-padding">
+                  <SEOHead
+                    title="מדיניות פרטיות - הובלות המקצוען"
+                    description="מדיניות הפרטיות שלנו - איך אנו מגנים על המידע האישי שלכם."
+                    keywords={['פרטיות', 'מדיניות', 'מידע אישי', 'הגנה']}
+                  />
+                  <PrivacyPolicy />
+                </div>
+              } />
+              <Route path="/terms-of-service" element={
+                <div className="admin-content-padding">
+                  <SEOHead
+                    title="תנאי שימוש - הובלות המקצוען"
+                    description="תנאי השימוש בשירותי הובלות המקצוען."
+                    keywords={['תנאים', 'שימוש', 'הובלות', 'שירותים']}
+                  />
+                  <TermsOfService />
                 </div>
               } />
           </Routes>
