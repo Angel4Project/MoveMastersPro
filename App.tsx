@@ -8,27 +8,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { COMPANY_INFO } from './types';
 
-// Import images using Vite's asset handling
-const LogoImage = new URL('/images/logo.png', import.meta.url).href;
+// Import images using reliable static paths
+const LogoImage = '/images/logo.png';
 
-// Google Translate type declarations
-declare global {
-  interface Window {
-    googleTranslateElementInit: () => void;
-    google: {
-      translate: {
-        TranslateElement: {
-          new (config: any, elementId: string): any;
-          InlineLayout: {
-            SIMPLE: string;
-            HORIZONTAL: string;
-            VERTICAL: string;
-          };
-        };
-      };
-    };
-  }
-}
 
 // Lazy Load Pages
 const Home = React.lazy(() => import('./pages/Home'));

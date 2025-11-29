@@ -9,8 +9,8 @@ import {
 import { COMPANY_INFO } from '../types';
 import { getTranslation, getCurrentLanguage, setCurrentLanguage, Language } from '../src/translations';
 
-// Import images using Vite's asset handling
-const LogoImage = new URL('/images/logo.png', import.meta.url).href;
+// Import images using reliable static paths
+const LogoImage = '/images/logo.png';
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -90,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
   };
 
   return (
-    <nav className={`fixed left-0 right-0 z-40 transition-all duration-500 ${isAuthenticated ? 'top-10' : 'top-0'}`}>
+    <nav className={`fixed left-0 right-0 z-[1000] transition-all duration-500 ${isAuthenticated ? 'top-10' : 'top-0'}`}>
       {/* Background עם אפקט גלאס */}
       <div className={`absolute inset-0 backdrop-blur-2xl transition-all duration-500 ${
         isScrolled
