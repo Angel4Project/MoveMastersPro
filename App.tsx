@@ -1,6 +1,6 @@
 import React, { useState, Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Truck } from 'lucide-react';
+import { Truck, MessageCircle, MapPin, Clock, Phone, Mail, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { COMPANY_INFO } from './types';
 
@@ -27,7 +27,6 @@ import { ChatBotProvider, useChatBot } from './context/ChatBotContext';
 import { googleSheetsService } from './services/googleSheetsService';
 import { emailService } from './services/emailService';
 import { whatsappService } from './services/whatsappService';
-// import { analyticsService } from './services/analyticsService'; // Not used in this component
 import { configService } from './services/configService';
 
 const LoadingFallback = () => (
@@ -49,29 +48,29 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   const socialLinks = [
-    { 
-      name: 'Facebook', 
-      icon: Facebook, 
-      url: 'https://facebook.com/hamiktzoan', 
-      color: 'hover:text-blue-400' 
+    {
+      name: 'Facebook',
+      icon: ExternalLink,
+      url: 'https://facebook.com/hamiktzoan',
+      color: 'hover:text-blue-400'
     },
-    { 
-      name: 'Instagram', 
-      icon: Instagram, 
-      url: 'https://instagram.com/hamiktzoan', 
-      color: 'hover:text-pink-400' 
+    {
+      name: 'Instagram',
+      icon: ExternalLink,
+      url: 'https://instagram.com/hamiktzoan',
+      color: 'hover:text-pink-400'
     },
-    { 
-      name: 'Twitter', 
-      icon: Twitter, 
-      url: 'https://twitter.com/hamiktzoan', 
-      color: 'hover:text-sky-400' 
+    {
+      name: 'Twitter',
+      icon: ExternalLink,
+      url: 'https://twitter.com/hamiktzoan',
+      color: 'hover:text-sky-400'
     },
-    { 
-      name: 'WhatsApp', 
-      icon: MessageCircle, 
-      url: `https://wa.me/972${COMPANY_INFO.phone.replace(/-/g, '').substring(1)}`, 
-      color: 'hover:text-green-400' 
+    {
+      name: 'WhatsApp',
+      icon: MessageCircle,
+      url: `https://wa.me/972${COMPANY_INFO.phone.replace(/-/g, '').substring(1)}`,
+      color: 'hover:text-green-400'
     }
   ];
 

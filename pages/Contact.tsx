@@ -420,7 +420,6 @@ const INVENTORY_PRESETS: { name: string, cbm: number, category: InventoryItem['c
 // Main Contact Component - Mobile First
 const Contact: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [currentLanguage] = useState(getCurrentLanguage());
   const [settings, setSettings] = useState<AppSettings>({
     basePrice: 500, pricePerKm: 15, pricePerRoom: 250, pricePerFloor: 50, pricePerCbm: 100, aiProvider: 'google', aiApiKey: '', aiModel: ''
   });
