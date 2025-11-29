@@ -3,6 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Root element properties to eliminate console warnings */
+:root {
+  writing-mode: horizontal-tb;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -23,11 +28,11 @@
 
 /* Admin Bar Content Padding */
 .admin-content-padding {
-  padding-top: 10rem; /* 160px for header + 40px for admin bar */
+  padding-top: 10rem; /* 160px for header */
 }
 
 .admin-authenticated .admin-content-padding {
-  padding-top: 11rem; /* Additional 40px when admin bar is visible */
+  padding-top: 8rem; /* 128px: 40px banner + 80px header + 8px margin */
 }
 
 /* Prevent horizontal scrolling globally */
