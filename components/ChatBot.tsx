@@ -303,7 +303,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
   };
 
   return (
-    <div className="fixed bottom-24 left-4 sm:left-6 z-50 font-sans">
+    <div className="fixed bottom-4 left-4 sm:left-6 z-50 font-sans">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -311,7 +311,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-[calc(100vw-2rem)] sm:w-80 max-w-sm h-[calc(100vh-8rem)] sm:h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4`}
+            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-[calc(100vw-2rem)] sm:w-80 max-w-sm h-[calc(100vh-6rem)] sm:h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col`}
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">

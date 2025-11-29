@@ -21,3 +21,12 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #2563eb;
 }
+
+/* Admin Bar Content Padding */
+.admin-content-padding {
+  padding-top: 10rem; /* 160px for header + 40px for admin bar */
+}
+
+.admin-authenticated .admin-content-padding {
+  padding-top: 11rem; /* Additional 40px when admin bar is visible */
+}
