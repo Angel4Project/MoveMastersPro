@@ -1,15 +1,9 @@
 import React, { useState, Suspense } from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Menu, X, Phone, Truck, Mail, MapPin, Shield,
-  Facebook, Instagram, Twitter, MessageCircle,
-  Clock, Star, Users, Zap, Eye, Palette, Languages
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Truck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { COMPANY_INFO } from './types';
 
-// Import images using reliable static paths
-const LogoImage = '/images/logo.png';
 
 
 // Lazy Load Pages

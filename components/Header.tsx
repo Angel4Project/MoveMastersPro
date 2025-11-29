@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Menu, X, Phone, Truck, Mail, MapPin, Shield,
-  Facebook, Instagram, Twitter, MessageCircle,
-  Clock, Star, Users, Zap, Eye, Palette, Languages
+  Menu, X, Truck, Shield,
+  Star, Users, Zap, Eye, Palette, Languages
 } from 'lucide-react';
-import { COMPANY_INFO } from '../types';
 import { getTranslation, getCurrentLanguage, setCurrentLanguage, Language } from '../src/translations';
 
 // Import images using reliable static paths

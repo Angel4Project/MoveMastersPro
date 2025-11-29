@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StorageService } from '../services/storage';
 import { AppSettings, InventoryItem, Lead } from '../types';
-import { Calculator, Send, Phone, MessageSquare, HelpCircle, ChevronDown, Check, Package, Home, Truck, ShieldCheck, Box, UserPlus, Gift, ArrowUp, ArrowDown, Diamond, AlertTriangle, Paperclip, X, Plus, Monitor, Tv, Minus, Info, Sofa, Armchair, Bed, Table, Computer, Utensils, Lamp, RotateCcw, Zap, Volume2, Eye, EyeOff } from 'lucide-react';
+import { Send, ChevronDown, Check, Package, Home, Truck, Box, UserPlus, Gift, ArrowUp, AlertTriangle, Plus, Monitor, Tv, Minus, Sofa, Armchair, Bed, Table, Utensils, Lamp } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { getTranslation, getCurrentLanguage } from '../src/translations';
 
 // Revolutionary 3D Truck Component - Mobile Optimized
 const Truck3DVisualization = ({ volume, maxVolume = 40, selectedItems = [] }: {
