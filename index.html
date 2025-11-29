@@ -41,32 +41,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Preload critical images -->
-    <link rel="preload" href="/images/logo.png" as="image" type="image/png">
-    <link rel="preload" href="/images/dadi.png" as="image" type="image/png">
-
-    <!-- Preload critical resources -->
-    <link rel="modulepreload" href="/index.tsx" />
-
     <title>הובלות המקצוען | שירותי הובלה מתקדמים</title>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('SW registered: ', registration);
-            })
-            .catch(function(registrationError) {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
 
     <script type="module" src="/index.tsx"></script>
   </body>
