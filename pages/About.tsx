@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 // import { StorageService } from '../services/storage'; // Not used in this component
 
 // Import images using Vite's asset handling
-const DadiImage = new URL('/images/דדי.png', import.meta.url).href;
+const DadiImage = new URL('/images/dadi.png', import.meta.url).href;
 
 const About: React.FC = () => {
   const ref = useRef(null);

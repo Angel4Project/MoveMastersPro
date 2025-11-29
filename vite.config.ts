@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => {
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.vue']
     },
 
-    // CSS configuration
+    // CSS configuration with performance optimizations
     css: {
       devSourcemap: !isProduction,
       preprocessorOptions: {
@@ -129,7 +129,7 @@ export default defineConfig(({ mode }) => {
         less: {
           javascriptEnabled: true
         }
-      }
+      },
     },
 
     // Worker configuration

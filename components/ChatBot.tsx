@@ -7,7 +7,7 @@ import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 import { useChat } from '../src/hooks/useChat';
 
 // Import avatar image
-const ChatBotAvatar = new URL('/images/עוזר-צ\'אט.png', import.meta.url).href;
+const ChatBotAvatar = new URL('/images/assistant-avatar.png', import.meta.url).href;
 
 interface MessageAction {
   label: string;
