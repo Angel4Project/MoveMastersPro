@@ -7,7 +7,7 @@ import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 import { useChat } from '../src/hooks/useChat';
 
 // Import avatar image using reliable static paths
-const ChatBotAvatar = '/images/assistant-avatar.png';
+const ChatBotAvatar = '/images/assistant-avatar.jpg';
 
 interface MessageAction {
   label: string;
@@ -43,18 +43,26 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
        const updatePosition = () => {
            const isMobile = window.innerWidth < 768;
            const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-           const headerHeight = isAuthenticated ? 120 : 80; // Approximate header height
-           const safeBottom = Math.max(16, headerHeight + 16);
+           const headerHeight = isAuthenticated ? 140 : 100; // More accurate header height
+           const chatHeight = 500; // Approximate chat height
+           const viewportHeight = window.innerHeight;
+           const safeBottom = Math.max(20, headerHeight + 20);
+           const maxBottom = viewportHeight - chatHeight - 20;
+           const finalBottom = Math.min(safeBottom, maxBottom);
 
            setChatPosition({
-               bottom: isMobile ? safeBottom + 20 : 16,
-               left: isMobile ? 16 : 16
+               bottom: isMobile ? finalBottom : 20,
+               left: isMobile ? 10 : 20
            });
        };
 
        updatePosition();
        window.addEventListener('resize', updatePosition);
-       return () => window.removeEventListener('resize', updatePosition);
+       window.addEventListener('orientationchange', updatePosition);
+       return () => {
+           window.removeEventListener('resize', updatePosition);
+           window.removeEventListener('orientationchange', updatePosition);
+       };
    }, []);
 
    // Use the chat hook
@@ -331,7 +339,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-[calc(100vw-2rem)] sm:w-80 max-w-sm h-[calc(100vh-6rem)] sm:h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col`}
+            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-[calc(100vw-2rem)] sm:w-80 max-w-sm h-[calc(100vh-6rem)] sm:h-[500px] rounded-2xl shadow-2xl shadow-blue-500/20 overflow-hidden flex flex-col`}
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">
@@ -354,7 +362,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsDarkMode(!isDarkMode)}
-                  className="text-white/80 hover:text-white p-1"
+                  className={`${isDarkMode ? 'text-white/80 hover:text-white' : 'text-slate-600 hover:text-slate-800'} p-1`}
                   title={isDarkMode ? 'מצב בהיר' : 'מצב כהה'}
                 >
                   {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -395,7 +403,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                   )}
                 </div>
               ))}
-              {isTyping && <div className="text-slate-500 text-xs px-4 animate-pulse">מקליד...</div>}
+              {isTyping && (
+                <div className="flex items-center gap-1 px-4 py-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                  <span className="text-slate-500 text-xs ml-2">מקליד...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 

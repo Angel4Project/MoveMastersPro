@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 // import { StorageService } from '../services/storage'; // Not used in this component
 
 // Import images using reliable static paths
-const DadiImage = '/images/dadi.png';
+const DadiImage = '/images/dadi.jpg';
 
 const About: React.FC = () => {
   const ref = useRef(null);

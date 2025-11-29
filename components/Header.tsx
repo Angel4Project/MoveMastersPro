@@ -8,7 +8,7 @@ import {
 import { getTranslation, getCurrentLanguage, setCurrentLanguage, Language } from '../src/translations';
 
 // Import images using reliable static paths
-const LogoImage = '/images/logo.png';
+const LogoImage = '/images/logo.jpg';
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -182,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               </button>
 
               {isThemeOpen && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
+                <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
                   <div className="p-3">
                     <div className="text-sm font-medium text-white mb-2">{getTranslation('chooseTheme', currentLanguage)}</div>
                     <div className="space-y-1">
@@ -219,7 +219,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               </button>
 
               {isTranslateOpen && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
+                <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
                   <div className="p-3">
                     <div className="text-sm font-medium text-white mb-2">{getTranslation('chooseLanguage', currentLanguage)}</div>
                     <div className="space-y-1">
