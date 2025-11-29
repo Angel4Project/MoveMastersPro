@@ -92,7 +92,10 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'js/[name]-[hash].js'
         },
         // External dependencies that shouldn't be bundled
-        external: isProduction ? [] : []
+        external: [
+          '@google/genai',
+          'winston'
+        ]
       }
     },
 
@@ -209,7 +212,6 @@ export default defineConfig(({ mode }) => {
         'firebase/firestore',
         'framer-motion',
         'lucide-react',
-        '@google/genai',
         'zod'
       ],
       exclude: ['@vite/client', '@vite/env']
