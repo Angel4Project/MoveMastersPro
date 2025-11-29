@@ -7,6 +7,7 @@ import {
   Clock, Star, Users, Zap, Eye, Palette, Languages
 } from 'lucide-react';
 import { COMPANY_INFO } from '../types';
+import { getTranslation, getCurrentLanguage, setCurrentLanguage, Language } from '../src/translations';
 
 // Import images using Vite's asset handling
 const LogoImage = new URL('/images/logo.png', import.meta.url).href;
@@ -21,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
   const [currentTheme, setCurrentTheme] = useState('default');
   const [isTranslateOpen, setIsTranslateOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguageState] = useState<Language>('he');
   const location = useLocation();
 
   // Scroll detection
@@ -37,6 +39,12 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
     const savedTheme = localStorage.getItem('theme') || 'default';
     setCurrentTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
+  // Language initialization
+  useEffect(() => {
+    const savedLanguage = getCurrentLanguage();
+    setCurrentLanguageState(savedLanguage);
   }, []);
 
   // Close dropdowns on outside click
@@ -59,11 +67,11 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
   }, [isTranslateOpen, isThemeOpen]);
 
   const links = [
-    { path: '/', label: 'בית', icon: Truck },
-    { path: '/quote', label: 'הצעת מחיר', icon: Star },
-    { path: '/store', label: 'חנות אריזה', icon: Zap },
-    { path: '/about', label: 'עלינו', icon: Users },
-    { path: '/blog', label: 'בלוג', icon: Eye },
+    { path: '/', label: getTranslation('home', currentLanguage), icon: Truck },
+    { path: '/quote', label: getTranslation('quote', currentLanguage), icon: Star },
+    { path: '/store', label: getTranslation('store', currentLanguage), icon: Zap },
+    { path: '/about', label: getTranslation('about', currentLanguage), icon: Users },
+    { path: '/blog', label: getTranslation('blog', currentLanguage), icon: Eye },
   ];
 
   const handleThemeChange = (theme: string) => {
@@ -74,28 +82,11 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
   };
 
   const handleLanguageSelect = (langCode: string) => {
-    // Load Google Translate widget
-    if (!document.querySelector('#google-translate-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-translate-script';
-      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      document.head.appendChild(script);
-
-      (window as any).googleTranslateElementInit = () => {
-        new (window as any).google.translate.TranslateElement({
-          pageLanguage: 'he',
-          includedLanguages: 'en,he,ar,ru,fr,de,es',
-          layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE
-        }, 'google_translate_element');
-      };
-    }
-
-    // Toggle translate widget
-    const translateElement = document.getElementById('google_translate_element');
-    if (translateElement) {
-      translateElement.style.display = translateElement.style.display === 'none' ? 'block' : 'none';
-    }
+    setCurrentLanguage(langCode as Language);
+    setCurrentLanguageState(langCode as Language);
     setIsTranslateOpen(false);
+    // Optionally reload the page to apply translations
+    window.location.reload();
   };
 
   return (
@@ -187,7 +178,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               <button
                 onClick={() => setIsThemeOpen(!isThemeOpen)}
                 className="p-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
-                title={`ערכת צבעים: ${currentTheme}`}
+                title={`${getTranslation('chooseTheme', currentLanguage)}: ${currentTheme}`}
               >
                 <Palette size={18} />
               </button>
@@ -195,13 +186,13 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               {isThemeOpen && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
                   <div className="p-3">
-                    <div className="text-sm font-medium text-white mb-2">בחר ערכת צבעים</div>
+                    <div className="text-sm font-medium text-white mb-2">{getTranslation('chooseTheme', currentLanguage)}</div>
                     <div className="space-y-1">
                       {[
-                        { key: 'default', name: 'ברירת מחדל', desc: 'כהה עם גרדיאנטים' },
-                        { key: 'dark', name: 'כהה מלא', desc: 'שחור ואפור' },
-                        { key: 'light', name: 'בהיר', desc: 'לבן ותכלת' },
-                        { key: 'ocean', name: 'אוקיינוס', desc: 'כחול וירוק' }
+                        { key: 'default', name: getTranslation('defaultTheme', currentLanguage), desc: 'כהה עם גרדיאנטים' },
+                        { key: 'dark', name: getTranslation('darkTheme', currentLanguage), desc: 'שחור ואפור' },
+                        { key: 'light', name: getTranslation('lightTheme', currentLanguage), desc: 'לבן ותכלת' },
+                        { key: 'ocean', name: getTranslation('oceanTheme', currentLanguage), desc: 'כחול וירוק' }
                       ].map((theme) => (
                         <button
                           key={theme.key}
@@ -224,7 +215,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               <button
                 onClick={() => setIsTranslateOpen(!isTranslateOpen)}
                 className="p-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
-                title="תרגום אתר"
+                title={getTranslation('translateSite', currentLanguage)}
               >
                 <Languages size={18} />
               </button>
@@ -232,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               {isTranslateOpen && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
                   <div className="p-3">
-                    <div className="text-sm font-medium text-white mb-2">בחר שפה</div>
+                    <div className="text-sm font-medium text-white mb-2">{getTranslation('chooseLanguage', currentLanguage)}</div>
                     <div className="space-y-1">
                       {[
                         { code: 'he', name: 'עברית', native: 'עברית' },
@@ -269,7 +260,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
               transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 1 }}
             />
             <Truck size={18} className="group-hover:rotate-12 transition-transform duration-300" />
-            <span>הזמן הובלה</span>
+            <span>{getTranslation('orderMoving', currentLanguage)}</span>
             <div className="absolute inset-0 bg-blue-400/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Link>
         </div>
@@ -288,8 +279,6 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
           </motion.div>
         </motion.button>
 
-        {/* Google Translate Element */}
-        <div id="google_translate_element" className="hidden md:block absolute top-full right-4 mt-2"></div>
 
         {/* Mobile Menu משופר */}
         <AnimatePresence>
@@ -336,7 +325,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated = false }) => {
                     className="flex items-center gap-3 text-slate-500 hover:text-slate-300 text-sm p-4 hover:bg-white/5 rounded-xl transition-all duration-300"
                   >
                     <Shield size={16} />
-                    <span>כניסת מנהל</span>
+                    <span>{getTranslation('adminLogin', currentLanguage)}</span>
                   </Link>
                 </motion.div>
               </div>
