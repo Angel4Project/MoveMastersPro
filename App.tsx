@@ -198,12 +198,12 @@ const NavBar = () => {
         {/* Mobile Menu משופר */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0, y: -20 }}
               animate={{ opacity: 1, height: 'auto', y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute top-24 left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+              className="absolute top-24 left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[60]"
             >
               <div className="flex flex-col p-4 gap-2">
                 {links.map((link, index) => (

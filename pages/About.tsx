@@ -47,10 +47,10 @@ const About: React.FC = () => {
       
       {/* Header Section */}
       <div className="max-w-5xl mx-auto px-4 text-center mb-24">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-6xl md:text-7xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500"
+          className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500"
         >
           מי <span className="text-white">אנחנו?</span>
         </motion.h1>
@@ -137,48 +137,80 @@ const About: React.FC = () => {
 
       {/* Interactive Timeline */}
       <div className="max-w-4xl mx-auto px-4 relative mb-32">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-5xl font-black text-center mb-20"
+          className="text-3xl md:text-5xl font-black text-center mb-8 md:mb-20"
         >
           תהליך <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">העבודה</span>
         </motion.h2>
-        
-        {/* The Line */}
-        <div className="absolute right-4 md:right-1/2 top-40 bottom-32 w-1 bg-slate-800 rounded-full">
-            <motion.div 
-                style={{ scaleY, transformOrigin: "top" }} 
-                className="w-full h-full bg-gradient-to-b from-blue-500 via-cyan-400 to-amber-400"
-            />
+
+        {/* Mobile: Horizontal Scroll Cards */}
+        <div className="md:hidden">
+          <div className="flex gap-4 overflow-x-auto pb-4 px-2 scrollbar-hide">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="flex-shrink-0 w-72 bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:border-blue-500/50 transition-all duration-500 shadow-xl group hover:shadow-2xl"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                    <step.icon size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold group-hover:text-blue-400 transition-colors">{step.title}</h3>
+                  </div>
+                </div>
+                <p className="text-slate-400 leading-relaxed text-sm">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+          <div className="text-center mt-4">
+            <p className="text-slate-500 text-sm">החלק ימינה כדי לראות את כל השלבים ←</p>
+          </div>
         </div>
 
-        <div className="space-y-32">
-          {steps.map((step, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`flex items-center gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} relative`}
-            >
-              {/* Dot on Line */}
-              <div className="absolute right-0 md:right-1/2 transform translate-x-1/2 w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full border-4 border-slate-900 z-10 shadow-lg shadow-blue-500/30" />
+        {/* Desktop: Original Timeline */}
+        <div className="hidden md:block">
+          {/* The Line */}
+          <div className="absolute right-4 md:right-1/2 top-40 bottom-32 w-1 bg-slate-800 rounded-full">
+              <motion.div
+                  style={{ scaleY, transformOrigin: "top" }}
+                  className="w-full h-full bg-gradient-to-b from-blue-500 via-cyan-400 to-amber-400"
+              />
+          </div>
 
-              <div className="w-full md:w-1/2"></div>
-              <div className="w-full md:w-1/2 pl-16 md:pl-0 md:px-12">
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:border-blue-500/50 transition-all duration-500 shadow-xl group hover:shadow-2xl">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600/20 to-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300">
-                    <step.icon size={32} />
+          <div className="space-y-32">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`flex items-center gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} relative`}
+              >
+                {/* Dot on Line */}
+                <div className="absolute right-0 md:right-1/2 transform translate-x-1/2 w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full border-4 border-slate-900 z-10 shadow-lg shadow-blue-500/30" />
+
+                <div className="w-full md:w-1/2"></div>
+                <div className="w-full md:w-1/2 pl-16 md:pl-0 md:px-12">
+                  <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:border-blue-500/50 transition-all duration-500 shadow-xl group hover:shadow-2xl">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600/20 to-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                      <step.icon size={32} />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">{step.title}</h3>
+                    <p className="text-slate-400 leading-relaxed text-lg">{step.desc}</p>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">{step.title}</h3>
-                  <p className="text-slate-400 leading-relaxed text-lg">{step.desc}</p>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
 
