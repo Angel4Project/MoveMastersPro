@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { StorageService } from '../services/storage';
-import { Lead, Product, BlogPost, AppSettings, AIProvider, Campaign } from '../types';
+import { Lead, Product, BlogPost, AppSettings, AIProvider, Campaign, ChatConversation } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
 import { 
   Trash2, CheckCircle, Save, Plus, LogOut, Settings, LayoutDashboard, 
   Users, ShoppingBag, FileText, ArrowLeft, Brain, Archive, Clock, 
-  Megaphone, TrendingUp, Calendar, Phone, Mail, MessageCircle, AlertTriangle, X, Search, Pin
+  Megaphone, TrendingUp, Calendar, Phone, Mail, MessageCircle, AlertTriangle, X, Search, Pin,
+  Download, RefreshCw, Filter, BarChart3, PieChart as PieChartIcon, Activity, Target, DollarSign
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +16,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'crm' | 'marketing' | 'products' | 'blog' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'crm' | 'marketing' | 'products' | 'blog' | 'chat' | 'settings'>('dashboard');
   const [loginPass, setLoginPass] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -24,6 +25,7 @@ const AdminPanel: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [chatConversations, setChatConversations] = useState<ChatConversation[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
     basePrice: 0, pricePerKm: 0, pricePerRoom: 0, pricePerFloor: 0, pricePerCbm: 0,
     aiProvider: 'google', aiApiKey: '', aiModel: ''
@@ -51,6 +53,7 @@ const AdminPanel: React.FC = () => {
     setCampaigns(StorageService.getCampaigns());
     setProducts(StorageService.getProducts());
     setBlogPosts(StorageService.getPosts());
+    setChatConversations(StorageService.getChatConversations());
     setSettings(StorageService.getSettings());
     setVisitsData(StorageService.getVisits());
   };
@@ -249,6 +252,7 @@ const AdminPanel: React.FC = () => {
           {[
               { id: 'dashboard', label: 'דשבורד ראשי', icon: LayoutDashboard },
               { id: 'crm', label: 'ניהול לידים (CRM)', icon: Users },
+              { id: 'chat', label: 'שיחות צ׳אט בוט', icon: MessageCircle },
               { id: 'marketing', label: 'שיווק וקמפיינים', icon: Megaphone },
               { id: 'products', label: 'ניהול חנות', icon: ShoppingBag },
               { id: 'blog', label: 'ניהול תוכן', icon: FileText },
@@ -430,7 +434,7 @@ const AdminPanel: React.FC = () => {
                                         </div>
                                         <div className="space-y-3">
                                             {filteredLeads.filter(l => l.status === col.id).map((lead, index) => (
-                                                <Draggable draggableId={lead.id} index={index} key={lead.id}>
+                                                <Draggable draggableId={lead.id} index={index}>
                                                     {(provided) => (
                                                         <div
                                                             ref={provided.innerRef}
@@ -789,6 +793,117 @@ const AdminPanel: React.FC = () => {
                             </div>
                         ))}
                     </div>
+                </motion.div>
+            )}
+
+            {activeTab === 'chat' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-bold">שיחות צ׳אט בוט</h2>
+                        <div className="relative">
+                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="חפש שיחות..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-slate-800 border border-white/10 rounded-full py-2 pr-10 pl-4 text-white focus:outline-none focus:border-blue-500 w-64 shadow-inner"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {chatConversations
+                            .filter(conv =>
+                                conv.userInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                conv.userInfo?.phone?.includes(searchTerm) ||
+                                conv.sessionId.includes(searchTerm)
+                            )
+                            .map(conversation => (
+                            <div key={conversation.id} className="bg-slate-800 rounded-xl overflow-hidden border border-white/5 relative group">
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 className="font-bold text-lg">
+                                                {conversation.userInfo?.name || 'משתמש אנונימי'}
+                                            </h3>
+                                            <p className="text-slate-400 text-sm">
+                                                {conversation.userInfo?.phone || 'ללא טלפון'}
+                                            </p>
+                                        </div>
+                                        <div className={`px-2 py-1 rounded-full text-xs ${
+                                            conversation.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                                            conversation.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
+                                            'bg-gray-500/20 text-gray-400'
+                                        }`}>
+                                            {conversation.status === 'active' ? 'פעיל' :
+                                             conversation.status === 'completed' ? 'הושלם' : 'בארכיון'}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-slate-400">הודעות:</span>
+                                            <span className="text-white">{conversation.messages.length}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-slate-400">התחיל:</span>
+                                            <span className="text-white">
+                                                {new Date(conversation.startedAt).toLocaleDateString('he-IL')}
+                                            </span>
+                                        </div>
+                                        {conversation.leadCreated && (
+                                            <div className="flex items-center gap-2 text-green-400 text-sm">
+                                                <CheckCircle size={14} />
+                                                <span>ליד נוצר</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="text-xs text-slate-500 mb-4">
+                                        {conversation.messages.length > 0 && (
+                                            <div className="bg-slate-900/50 rounded p-2">
+                                                <p className="line-clamp-2">
+                                                    {conversation.messages[conversation.messages.length - 1].text}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                // Open conversation details modal
+                                                alert(`שיחה: ${conversation.sessionId}\nהודעות: ${conversation.messages.length}`);
+                                            }}
+                                            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-sm transition"
+                                        >
+                                            צפה בשיחה
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm('למחוק שיחה זו?')) {
+                                                    StorageService.deleteChatConversation(conversation.id);
+                                                    loadData();
+                                                }
+                                            }}
+                                            className="p-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {chatConversations.length === 0 && (
+                        <div className="text-center py-16">
+                            <MessageCircle size={48} className="mx-auto text-slate-500 mb-4" />
+                            <h3 className="text-xl font-semibold text-slate-400 mb-2">אין שיחות עדיין</h3>
+                            <p className="text-slate-500">שיחות הצ׳אט בוט יופיעו כאן</p>
+                        </div>
+                    )}
                 </motion.div>
             )}
 

@@ -1,12 +1,55 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { PhoneCall, FileText, Box, Truck, Home, Target, Heart, Award } from 'lucide-react';
+import { 
+  PhoneCall, FileText, Box, Truck, Home, Target, Heart, Award, 
+  Star, Users, Clock, MapPin, Mail, Phone, Plus, Edit, X 
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { StorageService } from '../services/storage';
 
 const About: React.FC = () => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref });
   const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const { isAuthenticated } = useAuth();
+  
+  const [teamMembers, setTeamMembers] = useState([
+    {
+      id: '1',
+      name: 'דדי כהן',
+      role: 'מנכ״ל ובעלים',
+      image: '/images/dadi.jpg',
+      bio: 'המוביל את חברת הובלות המקצוען מאז הקמתה ב-2010. מעל 14 שנות ניסיון בתחום.',
+      phone: '050-5350148',
+      email: 'hovalotdedi@gmail.com',
+      isOwner: true
+    },
+    { 
+      id: '2', 
+      name: 'אבי לוי', 
+      role: 'מנהל תפעול', 
+      image: 'https://randomuser.me/api/portraits/men/2.jpg',
+      bio: 'אחראי על תיאום וניהול הפרויקטים היומיומיים',
+      isOwner: false
+    },
+    { 
+      id: '3', 
+      name: 'שרה ישראלי', 
+      role: 'שירות לקוחות', 
+      image: 'https://randomuser.me/api/portraits/women/3.jpg',
+      bio: 'מתמחה בליווי לקוחות ומתן שירות מעולה',
+      isOwner: false
+    },
+    { 
+      id: '4', 
+      name: 'דני רופ', 
+      role: 'ראש צוות הובלות', 
+      image: 'https://randomuser.me/api/portraits/men/4.jpg',
+      bio: 'מנהל את צוותי ההובלה והאריזה המקצועיים',
+      isOwner: false
+    },
+  ]);
 
   const steps = [
     { icon: PhoneCall, title: "שיחת ייעוץ", desc: "אנחנו מבינים את הצרכים שלך, בודקים את התכולה ונותנים הצעה ראשונית." },
@@ -16,79 +59,146 @@ const About: React.FC = () => {
     { icon: Home, title: "פריקה וסידור", desc: "לא עוזבים עד שהספה במקום והמיטה מורכבת. תתחדשו!" },
   ];
 
-  const team = [
-    { name: 'דדי כהן', role: 'מנכ״ל ובעלים', img: 'https://randomuser.me/api/portraits/men/1.jpg' },
-    { name: 'אבי לוי', role: 'מנהל תפעול', img: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { name: 'שרה ישראלי', role: 'שירות לקוחות', img: 'https://randomuser.me/api/portraits/women/3.jpg' },
-    { name: 'דני רופ', role: 'ראש צוות הובלות', img: 'https://randomuser.me/api/portraits/men/4.jpg' },
+  const achievements = [
+    { number: "15+", label: "שנות ניסיון", icon: Clock },
+    { number: "5000+", label: "לקוחות מרוצים", icon: Users },
+    { number: "98%", label: "שביעות רצון", icon: Star },
+    { number: "24/7", label: "זמינות לשירות", icon: Phone },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white pt-24 pb-12" ref={ref}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white pt-24 pb-12" ref={ref}>
       
-      {/* Header */}
-      <div className="max-w-4xl mx-auto px-4 text-center mb-24">
-        <h1 className="text-5xl md:text-6xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-amber-300">
-          מי אנחנו?
-        </h1>
-        <p className="text-xl text-slate-300 leading-relaxed">
+      {/* Header Section */}
+      <div className="max-w-5xl mx-auto px-4 text-center mb-24">
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-6xl md:text-7xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500"
+        >
+          מי <span className="text-white">אנחנו?</span>
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-xl md:text-2xl text-slate-300 leading-relaxed max-w-4xl mx-auto"
+        >
           הובלות המקצוען הוקמה בשנת 2010 מתוך חזון לשנות את תדמית ענף ההובלות בישראל.
           אנחנו מאמינים שמעבר דירה צריך להיות חוויה מרגשת וחיובית, לא כאב ראש.
-        </p>
+        </motion.p>
+      </div>
+
+      {/* Statistics Section */}
+      <div className="max-w-6xl mx-auto px-4 mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {achievements.map((achievement, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-6 text-center border border-white/10 hover:border-blue-500/30 transition-all duration-500"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <achievement.icon size={24} className="text-white" />
+              </div>
+              <div className="text-3xl font-black text-blue-400 mb-2">{achievement.number}</div>
+              <div className="text-slate-400 text-sm font-medium">{achievement.label}</div>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Vision Cards */}
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-8 mb-32">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-slate-800 p-8 rounded-2xl border border-white/5 text-center">
-            <div className="w-16 h-16 bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-400"><Target size={32} /></div>
-            <h3 className="text-2xl font-bold mb-4">המשימה שלנו</h3>
-            <p className="text-slate-400">להעניק לכל לקוח שקט נפשי מוחלט, תוך שימוש בטכנולוגיה מתקדמת וצוות אנושי מעולה.</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl p-8 rounded-3xl border border-white/10 text-center hover:border-blue-500/30 transition-all duration-500 group"
+        >
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600/20 to-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300">
+              <Target size={40} />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">המשימה שלנו</h3>
+            <p className="text-slate-400 leading-relaxed">
+              להעניק לכל לקוח שקט נפשי מוחלט, תוך שימוש בטכנולוגיה מתקדמת וצוות אנושי מעולה.
+            </p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="bg-slate-800 p-8 rounded-2xl border border-white/5 text-center">
-            <div className="w-16 h-16 bg-red-900/50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-400"><Heart size={32} /></div>
-            <h3 className="text-2xl font-bold mb-4">הערכים שלנו</h3>
-            <p className="text-slate-400">אמינות מעל הכל, שקיפות במחיר, כבוד לרכוש הלקוח, ועמידה קפדנית בזמנים.</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ delay: 0.1 }} 
+          className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl p-8 rounded-3xl border border-white/10 text-center hover:border-red-500/30 transition-all duration-500 group"
+        >
+            <div className="w-20 h-20 bg-gradient-to-br from-red-600/20 to-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-red-400 group-hover:scale-110 transition-transform duration-300">
+              <Heart size={40} />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 group-hover:text-red-400 transition-colors">הערכים שלנו</h3>
+            <p className="text-slate-400 leading-relaxed">
+              אמינות מעל הכל, שקיפות במחיר, כבוד לרכוש הלקוח, ועמידה קפדנית בזמנים.
+            </p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="bg-slate-800 p-8 rounded-2xl border border-white/5 text-center">
-            <div className="w-16 h-16 bg-amber-900/50 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-400"><Award size={32} /></div>
-            <h3 className="text-2xl font-bold mb-4">המצוינות שלנו</h3>
-            <p className="text-slate-400">אנחנו לא מתפשרים על איכות חומרי האריזה, על תחזוקת המשאיות ועל הכשרת העובדים שלנו.</p>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ delay: 0.2 }} 
+          className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl p-8 rounded-3xl border border-white/10 text-center hover:border-amber-500/30 transition-all duration-500 group"
+        >
+            <div className="w-20 h-20 bg-gradient-to-br from-amber-600/20 to-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-400 group-hover:scale-110 transition-transform duration-300">
+              <Award size={40} />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 group-hover:text-amber-400 transition-colors">המצוינות שלנו</h3>
+            <p className="text-slate-400 leading-relaxed">
+              אנחנו לא מתפשרים על איכות חומרי האריזה, על תחזוקת המשאיות ועל הכשרת העובדים שלנו.
+            </p>
         </motion.div>
       </div>
 
       {/* Interactive Timeline */}
       <div className="max-w-4xl mx-auto px-4 relative mb-32">
-        <h2 className="text-4xl font-bold text-center mb-16">תהליך העבודה</h2>
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-5xl font-black text-center mb-20"
+        >
+          תהליך <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">העבודה</span>
+        </motion.h2>
         
         {/* The Line */}
-        <div className="absolute right-4 md:right-1/2 top-32 bottom-20 w-1 bg-slate-800 rounded-full">
+        <div className="absolute right-4 md:right-1/2 top-40 bottom-32 w-1 bg-slate-800 rounded-full">
             <motion.div 
                 style={{ scaleY, transformOrigin: "top" }} 
-                className="w-full h-full bg-gradient-to-b from-blue-500 to-amber-400"
+                className="w-full h-full bg-gradient-to-b from-blue-500 via-cyan-400 to-amber-400"
             />
         </div>
 
-        <div className="space-y-24">
+        <div className="space-y-32">
           {steps.map((step, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className={`flex items-center gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} relative`}
             >
               {/* Dot on Line */}
-              <div className="absolute right-0 md:right-1/2 transform translate-x-1/2 w-4 h-4 bg-blue-500 rounded-full border-4 border-slate-900 z-10" />
+              <div className="absolute right-0 md:right-1/2 transform translate-x-1/2 w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full border-4 border-slate-900 z-10 shadow-lg shadow-blue-500/30" />
 
               <div className="w-full md:w-1/2"></div>
-              <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-12">
-                <div className="bg-slate-800/50 backdrop-blur border border-white/10 p-6 rounded-2xl hover:border-blue-500/50 transition-colors shadow-xl">
-                  <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mb-4 text-blue-400">
-                    <step.icon size={24} />
+              <div className="w-full md:w-1/2 pl-16 md:pl-0 md:px-12">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:border-blue-500/50 transition-all duration-500 shadow-xl group hover:shadow-2xl">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600/20 to-blue-500/20 rounded-2xl flex items-center justify-center mb-6 text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                    <step.icon size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
-                  <p className="text-slate-400">{step.desc}</p>
+                  <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">{step.title}</h3>
+                  <p className="text-slate-400 leading-relaxed text-lg">{step.desc}</p>
                 </div>
               </div>
             </motion.div>
@@ -97,33 +207,130 @@ const About: React.FC = () => {
       </div>
 
       {/* Team Section */}
-      <section className="bg-slate-800/30 py-20">
-          <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-4xl font-bold text-center mb-16">הצוות המנצח שלנו</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  {team.map((member, idx) => (
+      <section className="bg-gradient-to-br from-slate-800/20 via-slate-800/10 to-slate-800/20 py-24">
+          <div className="max-w-7xl mx-auto px-4">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-5xl font-black text-center mb-6"
+              >
+                הצוות <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">המנצח</span> שלנו
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-xl text-slate-400 text-center mb-16 max-w-2xl mx-auto"
+              >
+                צוות מקצועי ומנוסה שמחויב לשירות מעולה
+              </motion.p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {teamMembers.map((member, idx) => (
                       <motion.div 
-                        key={idx}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
+                        key={member.id}
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-center group"
+                        transition={{ delay: idx * 0.1 }}
+                        className="text-center group relative"
                       >
-                          <div className="relative mb-4 inline-block">
-                              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-slate-700 group-hover:border-blue-500 transition-colors duration-300">
-                                  <img src={member.img} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500" />
+                          <div className="relative mb-6 inline-block">
+                              <div className="w-40 h-40 md:w-48 md:h-48 rounded-3xl overflow-hidden border-4 border-slate-700 group-hover:border-blue-500 transition-all duration-500 shadow-2xl">
+                                  <img 
+                                    src={member.image} 
+                                    alt={member.name} 
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700" 
+                                  />
                               </div>
-                              <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 border-4 border-slate-900">
-                                  <Truck size={16} />
-                              </div>
+                              
+                              {/* Owner Badge */}
+                              {member.isOwner && (
+                                <div className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-500 to-amber-400 text-white rounded-full p-3 border-4 border-slate-900 shadow-lg">
+                                  <Award size={20} />
+                                </div>
+                              )}
+                              
+                              {/* Contact Icons */}
+                              {member.phone && (
+                                <div className="absolute -bottom-2 -left-2 bg-gradient-to-br from-green-600 to-green-500 text-white rounded-full p-3 border-4 border-slate-900 shadow-lg">
+                                  <Phone size={18} />
+                                </div>
+                              )}
                           </div>
-                          <h3 className="text-xl font-bold">{member.name}</h3>
-                          <p className="text-slate-400">{member.role}</p>
+                          
+                          <div className="bg-slate-800/30 backdrop-blur-xl rounded-2xl p-6 border border-white/10 group-hover:border-blue-500/30 transition-all duration-500">
+                            <h3 className="text-2xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{member.name}</h3>
+                            <p className="text-blue-400 font-semibold mb-3">{member.role}</p>
+                            <p className="text-slate-400 text-sm leading-relaxed mb-4">{member.bio}</p>
+                            
+                            {member.isOwner && (
+                              <div className="flex justify-center gap-3 mt-4">
+                                <a 
+                                  href={`tel:${member.phone}`}
+                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl transition-all duration-300 text-sm font-medium"
+                                >
+                                  <Phone size={16} />
+                                  התקשר
+                                </a>
+                                <a 
+                                  href={`mailto:${member.email}`}
+                                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all duration-300 text-sm font-medium"
+                                >
+                                  <Mail size={16} />
+                                  אימייל
+                                </a>
+                              </div>
+                            )}
+                          </div>
                       </motion.div>
                   ))}
               </div>
+
+              {/* Admin Controls */}
+              {isAuthenticated && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="mt-16 text-center"
+                >
+                  <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-6 backdrop-blur-xl">
+                    <h3 className="text-red-400 font-bold mb-4 flex items-center justify-center gap-2">
+                      <Users size={20} />
+                      פאנל ניהול צוות
+                    </h3>
+                    <p className="text-slate-400 mb-4">ניתן להוסיף, ערוך או מחק חברי צוות</p>
+                    <button className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all duration-300 font-medium flex items-center gap-2 mx-auto">
+                      <Plus size={18} />
+                      הוסף חבר צוות
+                    </button>
+                  </div>
+                </motion.div>
+              )}
           </div>
       </section>
+
+      {/* Company Location */}
+      <div className="max-w-4xl mx-auto px-4 mt-24">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center"
+        >
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <MapPin className="text-blue-400" size={32} />
+            <h3 className="text-2xl font-bold">איפה אנחנו נמצאים?</h3>
+          </div>
+          <p className="text-xl text-slate-300 mb-4">אחוזה 131, רעננה</p>
+          <p className="text-slate-400">
+            אנחנו משרתים את כל אזור השרון והמרכז, ומגיעים לכל הארץ בהתאם לצורך
+          </p>
+        </motion.div>
+      </div>
 
     </div>
   );

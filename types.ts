@@ -107,6 +107,37 @@ export interface Campaign {
   leads: number;
 }
 
+export interface ChatMessage {
+  id: number;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: number;
+  actions?: MessageAction[];
+}
+
+export interface ChatConversation {
+  id: string;
+  sessionId: string;
+  messages: ChatMessage[];
+  startedAt: number;
+  lastActivity: number;
+  userInfo?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+  leadCreated?: boolean;
+  leadId?: string;
+  status: 'active' | 'completed' | 'archived';
+}
+
+export interface MessageAction {
+  label: string;
+  type: 'phone' | 'whatsapp' | 'link';
+  value: string;
+  icon?: any;
+}
+
 export const COMPANY_INFO = {
     name: 'הובלות המקצוען',
     owner: 'דדי',

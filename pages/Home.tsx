@@ -4,9 +4,13 @@ import { Truck, Box, Clock, ShieldCheck, ChevronDown, Star, Users, MapPin, Packa
 import { Link } from 'react-router-dom';
 import { StorageService } from '../services/storage';
 import { Testimonial } from '../types';
+import RepresentativePopup from '../components/RepresentativePopup';
+import { useChatBot } from '../context/ChatBotContext';
 
 const Home: React.FC = () => {
   const [reviews, setReviews] = useState<Testimonial[]>([]);
+  const [isRepresentativePopupOpen, setIsRepresentativePopupOpen] = useState(false);
+  const { openChatBot } = useChatBot();
   
   useEffect(() => {
     setReviews(StorageService.getReviews());
@@ -192,12 +196,22 @@ const Home: React.FC = () => {
             <Link to="/quote" className="px-12 py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl text-xl transition shadow-lg flex items-center justify-center gap-2">
               <Truck /> הזמן הובלה עכשיו
             </Link>
-            <Link to="/contact" className="px-12 py-4 bg-transparent border-2 border-white/20 hover:bg-white/10 text-white font-bold rounded-xl text-xl transition">
-              דבר עם נציג
-            </Link>
+            <button
+              onClick={() => setIsRepresentativePopupOpen(true)}
+              className="px-12 py-4 bg-transparent border-2 border-white/20 hover:bg-white/10 text-white font-bold rounded-xl text-xl transition flex items-center justify-center gap-2"
+            >
+              <Users /> דבר עם נציג
+            </button>
           </div>
         </div>
       </section>
+
+      {/* Representative Popup */}
+      <RepresentativePopup
+        isOpen={isRepresentativePopupOpen}
+        onClose={() => setIsRepresentativePopupOpen(false)}
+        onOpenChatbot={openChatBot}
+      />
     </div>
   );
 };

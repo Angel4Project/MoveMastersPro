@@ -2,9 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Phone, Sparkles, User, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateAIResponse } from '../services/geminiService';
+import { generateAIResponse } from '../services/aiService';
 import { StorageService } from '../services/storage';
-import { COMPANY_INFO, Lead } from '../types';
+import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 
 interface MessageAction {
   label: string;
@@ -22,8 +22,17 @@ interface Message {
 
 type ConversationStep = 'idle' | 'name' | 'phone';
 
-const ChatBot: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface ChatBotProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+}
+
+const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [conversationId, setConversationId] = useState<string>('');
+
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
   const [messages, setMessages] = useState<Message[]>([
     { 
       id: 1, 
@@ -47,8 +56,65 @@ const ChatBot: React.FC = () => {
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   useEffect(scrollToBottom, [messages]);
 
+  // Initialize conversation session
+  useEffect(() => {
+    if (isOpen && !conversationId) {
+      const sessionId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setConversationId(sessionId);
+
+      const newConversation: ChatConversation = {
+        id: sessionId,
+        sessionId,
+        messages: messages.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          sender: msg.sender,
+          timestamp: Date.now(),
+          actions: msg.actions
+        })),
+        startedAt: Date.now(),
+        lastActivity: Date.now(),
+        status: 'active'
+      };
+
+      StorageService.saveChatConversation(newConversation);
+    }
+  }, [isOpen, conversationId, messages]);
+
+  // Save messages to conversation
+  const saveMessageToConversation = (message: Message) => {
+    if (conversationId) {
+      const conversation = StorageService.getChatConversations().find(c => c.id === conversationId);
+      if (conversation) {
+        const chatMessage: ChatMessage = {
+          id: message.id,
+          text: message.text,
+          sender: message.sender,
+          timestamp: Date.now(),
+          actions: message.actions
+        };
+
+        const updatedConversation = {
+          ...conversation,
+          messages: [...conversation.messages, chatMessage],
+          lastActivity: Date.now(),
+          userInfo: conversation.userInfo || leadData.name ? {
+            name: leadData.name,
+            phone: leadData.phone
+          } : undefined,
+          leadCreated: conversation.leadCreated || (leadData.name && leadData.phone),
+          status: 'active' as const
+        };
+
+        StorageService.saveChatConversation(updatedConversation);
+      }
+    }
+  };
+
   const addBotMessage = (text: string, actions?: MessageAction[]) => {
-    setMessages(prev => [...prev, { id: Date.now(), text, sender: 'bot', actions }]);
+    const newMessage = { id: Date.now(), text, sender: 'bot' as const, actions };
+    setMessages(prev => [...prev, newMessage]);
+    saveMessageToConversation(newMessage);
   };
 
   const saveLeadToCRM = (name: string, phone: string) => {
@@ -65,6 +131,15 @@ const ChatBot: React.FC = () => {
       notes: 'נוצר אוטומטית דרך הצ׳אט בוט'
     };
     StorageService.saveLead(newLead);
+
+    // Update conversation with lead info
+    if (conversationId) {
+      StorageService.updateChatConversation(conversationId, {
+        leadCreated: true,
+        leadId: newLead.id,
+        userInfo: { name, phone }
+      });
+    }
   };
 
   const handleStepLogic = async (text: string) => {
@@ -150,11 +225,12 @@ const ChatBot: React.FC = () => {
     if (!inputValue.trim()) return;
     const userMsg: Message = { id: Date.now(), text: inputValue, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
+    saveMessageToConversation(userMsg);
     setInputValue("");
     setIsTyping(true);
 
     await handleStepLogic(inputValue);
-    
+
     setIsTyping(false);
   };
 
@@ -176,7 +252,7 @@ const ChatBot: React.FC = () => {
                     <span className="text-blue-200 text-xs">מחובר כעת</span>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
+              <button onClick={() => onToggle ? onToggle() : setInternalIsOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900/50">
@@ -232,7 +308,7 @@ const ChatBot: React.FC = () => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleOpen}
         className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] relative group"
       >
         <MessageCircle size={28} />
