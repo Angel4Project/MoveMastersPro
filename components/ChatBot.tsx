@@ -30,12 +30,32 @@ interface ChatBotProps {
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) => {
-   const [internalIsOpen, setInternalIsOpen] = useState(false);
-   const [conversationId, setConversationId] = useState<string>('');
-   const [isDarkMode, setIsDarkMode] = useState(true);
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+    const [conversationId, setConversationId] = useState<string>('');
+    const [isDarkMode, setIsDarkMode] = useState(true);
+    const [chatPosition, setChatPosition] = useState({ bottom: 16, left: 16 });
 
    const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
    const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
+
+   // Dynamic positioning based on screen size and header
+   useEffect(() => {
+       const updatePosition = () => {
+           const isMobile = window.innerWidth < 768;
+           const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+           const headerHeight = isAuthenticated ? 120 : 80; // Approximate header height
+           const safeBottom = Math.max(16, headerHeight + 16);
+
+           setChatPosition({
+               bottom: isMobile ? safeBottom + 20 : 16,
+               left: isMobile ? 16 : 16
+           });
+       };
+
+       updatePosition();
+       window.addEventListener('resize', updatePosition);
+       return () => window.removeEventListener('resize', updatePosition);
+   }, []);
 
    // Use the chat hook
    const { isListening, voiceError, startVoiceRecognition, stopVoiceRecognition, quickActions, sendMessage, detectLeadInfo } = useChat();
@@ -303,7 +323,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
   };
 
   return (
-    <div className="fixed bottom-4 left-4 sm:left-6 z-50 font-sans">
+    <div className="fixed z-50 font-sans" style={{ bottom: chatPosition.bottom, left: chatPosition.left }}>
       <AnimatePresence>
         {isOpen && (
           <motion.div
