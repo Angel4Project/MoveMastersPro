@@ -111,6 +111,9 @@ const NavBar = () => {
               src="/images/לוגו.png"
               alt="לוגו הובלות המקצוען"
               className="w-12 h-12 rounded-xl object-contain group-hover:brightness-110 transition-all duration-300 shadow-[0_8px_32px_rgba(59,130,246,0.4)] border border-blue-400/30 group-hover:border-blue-300/50"
+              onError={(e) => {
+                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiMxZTQwYWYiLz4KPHBhdGggZD0iTTMwIDI0SDE4TTI0IDE4djEyIiBzdHJva2U9IiM2MzY2ZjEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+              }}
             />
             {/* Glow effect */}
             <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -203,7 +206,7 @@ const NavBar = () => {
               animate={{ opacity: 1, height: 'auto', y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute top-24 left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[60]"
+              className="absolute top-24 left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[70]"
             >
               <div className="flex flex-col p-4 gap-2">
                 {links.map((link, index) => (

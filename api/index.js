@@ -76,6 +76,91 @@ const db = getFirestore(app);
 // Gemini AI setup
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Local knowledge base for fallback
+const localKnowledgeBase = {
+  'שלום': 'שלום! אני העוזר הדיגיטלי של הובלות המקצוען. איך אפשר לעזור לך היום?',
+  'היי': 'היי! אני כאן לעזור לך עם כל שאלה בנוגע להובלות. מה אתה צריך?',
+  'מה השירותים שלכם': 'אנחנו מציעים: הובלת דירות, משרדים, אריזה מקצועית, שירותי מנוף, אחסון זמני והובלות בינלאומיות. כל השירותים עם ביטוח מלא.',
+  'מה המחירים': 'המחירים תלויים במרחק, גודל ההובלה ומספר החדרים. מחיר בסיס: 800 ש״ח, 15 ש״ח לק״מ, 200 ש״ח לחדר. צור קשר לקבלת הצעת מחיר מדויקת.',
+  'מי אתה': 'אני העוזר הדיגיטלי של הובלות המקצוען, חברה בבעלות דדי. האתר נוצר על ידי ANGEL4PROJECT.',
+  'מי יצר את האתר': 'האתר נוצר על ידי ANGEL4PROJECT, מומחה לפיתוח אתרים ופתרונות דיגיטליים מתקדמים.',
+  'איפה אתם נמצאים': 'אנחנו ממוקמים באחוזה 131, רעננה. משרתים את כל הארץ עם צי מתקדם.',
+  'מה הטלפון': 'ניתן להשיג את דדי בטלפון: 050-5350148 או בוואטסאפ.',
+  'איך להזמין': 'ניתן להזמין שירות דרך האתר, טלפון או וואטסאפ. נשמח לתאם ביקור להערכת היקף ההובלה.',
+  'מה הביטוח': 'כל הובלה כוללת ביטוח תכולה מלא עד 100,000 ש״ח. אנחנו דואגים לביטחון הרכוש שלך.',
+  'איך להתכונן להובלה': 'הכנת רשימת חפצים, אריזה של חפצים שבירים, ניקוי המקום הישן והכנת המקום החדש. אנחנו נעזור בכל השלבים.',
+  'כמה זמן לוקחת הובלה': 'הובלת דירה ממוצעת לוקחת 4-6 שעות. תלוי בגודל ההובלה ומרחק הנסיעה.',
+  'איך לבטל הזמנה': 'ניתן לבטל או לשנות הזמנה עד 48 שעות לפני מועד ההובלה ללא עמלות.',
+  'מה כולל השירות': 'השירות כולל: אריזה מקצועית, הובלה, פריקה, הרכבה של רהיטים והובלה למקום החדש.',
+  'האם אתם עובדים בסופש': 'כן, אנחנו עובדים גם בסופי שבוע וחגים. זמינים 24/7 לשירות לקוחות.',
+  'מה הציוד שלכם': 'צי מתקדם של משאיות מודרניות עם מנופים, צוות מאומן וביטוח מלא.',
+  'איך לשלם': 'אפשר לשלם במזומן, העברה בנקאית, צ\'ק או אשראי. קבלות מס כחוק.',
+  'יש הנחות': 'כן, הנחות לחברי מילואים, סטודנטים ומשפחות ברוכות ילדים. צור קשר לבדוק זכאות.',
+  'מה הלקוחות אומרים': 'לקוחותינו מרוצים מהשירות המקצועי, האמינות והמחירים ההוגנים. קרא חוות דעת באתר.',
+  'איך לעקוב אחר ההובלה': 'נעדכן אותך בזמן אמת על התקדמות ההובלה. ניתן להתקשר בכל עת.',
+  'מה אם יש נזק': 'במקרה נדיר של נזק, הביטוח שלנו מכסה עד 100,000 ש״ח. נטפל בכל בעיה מיידית.',
+  'איך להכין רשימת אריזה': 'הכן רשימת חדרים וחפצים. סמן חפצים שבירים. הכן קופסאות וחומרי אריזה.',
+  'כמה אנשים צריך': 'לדירה 3-4 חדרים: 2-3 אנשים. למשרד: תלוי בגודל. נמליץ על הצוות המתאים.',
+  'האם אתם עושים אריזה': 'כן, שירות אריזה מקצועי עם חומרים איכותיים וצוות מנוסה.',
+  'מה לגבי חיות מחמד': 'אנחנו יכולים להוביל חיות מחמד בבטחה. יש להודיע מראש על הצורך.',
+  'איך לבחור תאריך': 'בחר תאריך נוח. אנחנו זמינים כל השבוע. מומלץ לתכנן שבוע-שבועיים מראש.',
+  'מה אם אני צריך אחסון': 'יש לנו מחסנים מאובטחים לאחסון זמני. שירות מלא עם ביטוח.',
+  'האם אתם עושים הובלות בינלאומיות': 'כן, הובלות בינלאומיות עם כל הניירת והביטוח הנדרש.',
+  'מה היתרון שלכם': '15 שנות ניסיון, צי מתקדם, ביטוח מלא, שירות 24/7 ומחירים הוגנים.',
+  'איך להתחיל': 'צור קשר עכשיו לקבלת הצעת מחיר חינמית. נשלח נציג להערכה.',
+  'תודה': 'תודה לך! נשמח לעזור בכל שאלה נוספת. צור קשר בכל עת.',
+  'ביי': 'להתראות! בהצלחה עם ההובלה. נשאר בקשר.',
+  'ברוכים הבאים': 'ברוך הבא לאתר הובלות המקצוען! איך אפשר לעזור לך היום?'
+};
+
+const getLocalResponse = (input) => {
+  const lowerInput = input.toLowerCase().trim();
+
+  // Direct matches
+  if (localKnowledgeBase[lowerInput]) {
+    return localKnowledgeBase[lowerInput];
+  }
+
+  // Partial matches
+  for (const [key, response] of Object.entries(localKnowledgeBase)) {
+    if (lowerInput.includes(key) || key.includes(lowerInput)) {
+      return response;
+    }
+  }
+
+  // Keyword-based responses
+  if (lowerInput.includes('מחיר') || lowerInput.includes('עלות') || lowerInput.includes('כמה')) {
+    return localKnowledgeBase['מה המחירים'];
+  }
+
+  if (lowerInput.includes('שירות') || lowerInput.includes('מה אתם עושים')) {
+    return localKnowledgeBase['מה השירותים שלכם'];
+  }
+
+  if (lowerInput.includes('טלפון') || lowerInput.includes('צור קשר') || lowerInput.includes('דדי')) {
+    return localKnowledgeBase['מה הטלפון'];
+  }
+
+  if (lowerInput.includes('איפה') || lowerInput.includes('מיקום') || lowerInput.includes('כתובת')) {
+    return localKnowledgeBase['איפה אתם נמצאים'];
+  }
+
+  if (lowerInput.includes('מי') || lowerInput.includes('יצר') || lowerInput.includes('angel4project')) {
+    return localKnowledgeBase['מי יצר את האתר'];
+  }
+
+  if (lowerInput.includes('הזמן') || lowerInput.includes('הזמנה') || lowerInput.includes('איך')) {
+    return localKnowledgeBase['איך להזמין'];
+  }
+
+  if (lowerInput.includes('ביטוח') || lowerInput.includes('אחריות')) {
+    return localKnowledgeBase['מה הביטוח'];
+  }
+
+  // Default response
+  return 'שלום! אני העוזר הדיגיטלי של הובלות המקצוען. איך אפשר לעזור לך? אתה יכול לשאול על מחירים, שירותים, או צור קשר עם דדי בטלפון 050-5350148.';
+};
+
 // Google Sheets setup
 const sheets = google.sheets('v4');
 const auth = new google.auth.GoogleAuth({
@@ -434,10 +519,15 @@ ${conversationContext ? `היסטוריית שיחה:\n${conversationContext}\n\
           leadDetected: leadDetected
         });
       } catch (error) {
-        logger.error('AI chat processing failed', { error: error.message, input: body.input });
+        logger.error('AI chat processing failed, using local knowledge base', { error: error.message, input: body.input });
+
+        // Use local knowledge base as fallback
+        const localResponse = getLocalResponse(body.input);
+
         return res.status(200).json({
           success: true,
-          response: "מתנצל, יש לי עומס כרגע. אנא נסה שוב מאוחר יותר."
+          response: localResponse,
+          fallback: true
         });
       }
     }

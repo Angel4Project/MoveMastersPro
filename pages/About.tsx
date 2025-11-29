@@ -20,6 +20,7 @@ const About: React.FC = () => {
       name: 'דדי',
       role: 'מנכ״ל ובעלים',
       image: '/images/דדי.png',
+      fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iMTAwIiBmaWxsPSIjMWU0MGFmIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iIzYzNjZmMSIvPgo8cGF0aCBkPSJNNTAgMTQwUTUwIDE2MCA3MCAxNjBMMTEwIDE2MFExMzAgMTYwIDEzMCAxNDBMMTMwIDEwMFExMzAgODAgMTEwIDgwTDcwIDgwUTEwMCA4MCAxMDAgMTAwTDEwMCAxNDBaIiBmaWxsPSIjNjM2NmYxIi8+Cjwvc3ZnPgo=',
       bio: 'דדי הוא המנהל והמוביל של המיזם, והוא אחראי לכל השירותים, הפיתוחים והפתרונות הדיגיטליים המוצעים באתר. האתר פותח על ידי ANGEL4PROJECT.',
       phone: '050-5350148',
       email: 'hovalotdedi@gmail.com',
@@ -247,10 +248,15 @@ const About: React.FC = () => {
                       >
                           <div className="relative mb-6 inline-block">
                               <div className="w-40 h-40 md:w-48 md:h-48 rounded-3xl overflow-hidden border-4 border-slate-700 group-hover:border-blue-500 transition-all duration-500 shadow-2xl">
-                                  <img 
-                                    src={member.image} 
-                                    alt={member.name} 
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700" 
+                                  <img
+                                    src={member.image}
+                                    alt={member.name}
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700"
+                                    onError={(e) => {
+                                      if (member.fallbackImage) {
+                                        e.currentTarget.src = member.fallbackImage;
+                                      }
+                                    }}
                                   />
                               </div>
                               

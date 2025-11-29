@@ -58,6 +58,92 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Local knowledge base for fallback
+  const getLocalResponse = (input: string) => {
+    const lowerInput = input.toLowerCase().trim();
+
+    // Direct matches
+    const responses: { [key: string]: string } = {
+      'שלום': 'שלום! אני העוזר הדיגיטלי של הובלות המקצוען. איך אפשר לעזור לך היום?',
+      'היי': 'היי! אני כאן לעזור לך עם כל שאלה בנוגע להובלות. מה אתה צריך?',
+      'מה השירותים שלכם': 'אנחנו מציעים: הובלת דירות, משרדים, אריזה מקצועית, שירותי מנוף, אחסון זמני והובלות בינלאומיות. כל השירותים עם ביטוח מלא.',
+      'מה המחירים': 'המחירים תלויים במרחק, גודל ההובלה ומספר החדרים. מחיר בסיס: 800 ש״ח, 15 ש״ח לק״מ, 200 ש״ח לחדר. צור קשר לקבלת הצעת מחיר מדויקת.',
+      'מי אתה': 'אני העוזר הדיגיטלי של הובלות המקצוען, חברה בבעלות דדי. האתר נוצר על ידי ANGEL4PROJECT.',
+      'מי יצר את האתר': 'האתר נוצר על ידי ANGEL4PROJECT, מומחה לפיתוח אתרים ופתרונות דיגיטליים מתקדמים.',
+      'איפה אתם נמצאים': 'אנחנו ממוקמים באחוזה 131, רעננה. משרתים את כל הארץ עם צי מתקדם.',
+      'מה הטלפון': 'ניתן להשיג את דדי בטלפון: 050-5350148 או בוואטסאפ.',
+      'איך להזמין': 'ניתן להזמין שירות דרך האתר, טלפון או וואטסאפ. נשמח לתאם ביקור להערכת היקף ההובלה.',
+      'מה הביטוח': 'כל הובלה כוללת ביטוח תכולה מלא עד 100,000 ש״ח. אנחנו דואגים לביטחון הרכוש שלך.',
+      'איך להתכונן להובלה': 'הכנת רשימת חפצים, אריזה של חפצים שבירים, ניקוי המקום הישן והכנת המקום החדש. אנחנו נעזור בכל השלבים.',
+      'כמה זמן לוקחת הובלה': 'הובלת דירה ממוצעת לוקחת 4-6 שעות. תלוי בגודל ההובלה ומרחק הנסיעה.',
+      'איך לבטל הזמנה': 'ניתן לבטל או לשנות הזמנה עד 48 שעות לפני מועד ההובלה ללא עמלות.',
+      'מה כולל השירות': 'השירות כולל: אריזה מקצועית, הובלה, פריקה, הרכבה של רהיטים והובלה למקום החדש.',
+      'האם אתם עובדים בסופש': 'כן, אנחנו עובדים גם בסופי שבוע וחגים. זמינים 24/7 לשירות לקוחות.',
+      'מה הציוד שלכם': 'צי מתקדם של משאיות מודרניות עם מנופים, צוות מאומן וביטוח מלא.',
+      'איך לשלם': 'אפשר לשלם במזומן, העברה בנקאית, צ\'ק או אשראי. קבלות מס כחוק.',
+      'יש הנחות': 'כן, הנחות לחברי מילואים, סטודנטים ומשפחות ברוכות ילדים. צור קשר לבדוק זכאות.',
+      'מה הלקוחות אומרים': 'לקוחותינו מרוצים מהשירות המקצועי, האמינות והמחירים ההוגנים. קרא חוות דעת באתר.',
+      'איך לעקוב אחר ההובלה': 'נעדכן אותך בזמן אמת על התקדמות ההובלה. ניתן להתקשר בכל עת.',
+      'מה אם יש נזק': 'במקרה נדיר של נזק, הביטוח שלנו מכסה עד 100,000 ש״ח. נטפל בכל בעיה מיידית.',
+      'איך להכין רשימת אריזה': 'הכן רשימת חדרים וחפצים. סמן חפצים שבירים. הכן קופסאות וחומרי אריזה.',
+      'כמה אנשים צריך': 'לדירה 3-4 חדרים: 2-3 אנשים. למשרד: תלוי בגודל. נמליץ על הצוות המתאים.',
+      'האם אתם עושים אריזה': 'כן, שירות אריזה מקצועי עם חומרים איכותיים וצוות מנוסה.',
+      'מה לגבי חיות מחמד': 'אנחנו יכולים להוביל חיות מחמד בבטחה. יש להודיע מראש על הצורך.',
+      'איך לבחור תאריך': 'בחר תאריך נוח. אנחנו זמינים כל השבוע. מומלץ לתכנן שבוע-שבועיים מראש.',
+      'מה אם אני צריך אחסון': 'יש לנו מחסנים מאובטחים לאחסון זמני. שירות מלא עם ביטוח.',
+      'האם אתם עושים הובלות בינלאומיות': 'כן, הובלות בינלאומיות עם כל הניירת והביטוח הנדרש.',
+      'מה היתרון שלכם': '15 שנות ניסיון, צי מתקדם, ביטוח מלא, שירות 24/7 ומחירים הוגנים.',
+      'איך להתחיל': 'צור קשר עכשיו לקבלת הצעת מחיר חינמית. נשלח נציג להערכה.',
+      'תודה': 'תודה לך! נשמח לעזור בכל שאלה נוספת. צור קשר בכל עת.',
+      'ביי': 'להתראות! בהצלחה עם ההובלה. נשאר בקשר.',
+      'ברוכים הבאים': 'ברוך הבא לאתר הובלות המקצוען! איך אפשר לעזור לך היום?'
+    };
+
+    // Direct matches
+    if (responses[lowerInput]) {
+      return responses[lowerInput];
+    }
+
+    // Partial matches
+    for (const [key, response] of Object.entries(responses)) {
+      if (lowerInput.includes(key) || key.includes(lowerInput)) {
+        return response;
+      }
+    }
+
+    // Keyword-based responses
+    if (lowerInput.includes('מחיר') || lowerInput.includes('עלות') || lowerInput.includes('כמה')) {
+      return responses['מה המחירים'];
+    }
+
+    if (lowerInput.includes('שירות') || lowerInput.includes('מה אתם עושים')) {
+      return responses['מה השירותים שלכם'];
+    }
+
+    if (lowerInput.includes('טלפון') || lowerInput.includes('צור קשר') || lowerInput.includes('דדי')) {
+      return responses['מה הטלפון'];
+    }
+
+    if (lowerInput.includes('איפה') || lowerInput.includes('מיקום') || lowerInput.includes('כתובת')) {
+      return responses['איפה אתם נמצאים'];
+    }
+
+    if (lowerInput.includes('מי') || lowerInput.includes('יצר') || lowerInput.includes('angel4project')) {
+      return responses['מי יצר את האתר'];
+    }
+
+    if (lowerInput.includes('הזמן') || lowerInput.includes('הזמנה') || lowerInput.includes('איך')) {
+      return responses['איך להזמין'];
+    }
+
+    if (lowerInput.includes('ביטוח') || lowerInput.includes('אחריות')) {
+      return responses['מה הביטוח'];
+    }
+
+    // Default response
+    return 'שלום! אני העוזר הדיגיטלי של הובלות המקצוען. איך אפשר לעזור לך? אתה יכול לשאול על מחירים, שירותים, או צור קשר עם דדי בטלפון 050-5350148.';
+  };
+
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   useEffect(scrollToBottom, [messages]);
 
@@ -262,13 +348,21 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
 
     // Detect lead info
     const detectedLead = detectLeadInfo(inputValue);
-    if (detectedLead.name) setLeadData(prev => ({ ...prev, name: detectedLead.name }));
-    if (detectedLead.phone) setLeadData(prev => ({ ...prev, phone: detectedLead.phone }));
-    if (detectedLead.email) setLeadData(prev => ({ ...prev, email: detectedLead.email }));
+    if (detectedLead.name) setLeadData(prev => ({ ...prev, name: detectedLead.name || prev.name }));
+    if (detectedLead.phone) setLeadData(prev => ({ ...prev, phone: detectedLead.phone || prev.phone }));
+    if (detectedLead.email) setLeadData(prev => ({ ...prev, email: detectedLead.email || prev.email }));
 
-    // Try AI first
+    // Get chatbot source from settings
     const settings = StorageService.getSettings();
-    if (settings.aiApiKey) {
+    const chatbotSource = settings.aiProvider || 'google';
+
+    // Try AI or local knowledge base
+    if ((settings as any).chatbotSource === 'local' || !settings.aiApiKey) {
+      // Use local knowledge base
+      const localResponse = getLocalResponse(inputValue);
+      addBotMessage(localResponse);
+    } else {
+      // Try AI first
       try {
         const data = await sendMessage(inputValue, messages);
         if (data.success) {
@@ -286,13 +380,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             }
           }
         } else {
-          await handleStepLogic(inputValue);
+          // Fallback to local knowledge base
+          const localResponse = getLocalResponse(inputValue);
+          addBotMessage(localResponse);
         }
       } catch (e) {
-        await handleStepLogic(inputValue);
+        // Fallback to local knowledge base
+        const localResponse = getLocalResponse(inputValue);
+        addBotMessage(localResponse);
       }
-    } else {
-      await handleStepLogic(inputValue);
     }
 
     setIsTyping(false);
@@ -316,6 +412,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                   className="w-8 h-8 rounded-full border-2 border-white/20"
                   animate={isTyping ? { scale: [1, 1.1, 1] } : {}}
                   transition={{ duration: 0.5, repeat: isTyping ? Infinity : 0 }}
+                  onError={(e) => {
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxZTQwYWYiLz4KPHBhdGggZD0iTTIyIDIyYzAtMS41LTEuMS0yLjctMi43LTMtMy0uMy00LTEuMy00LTMtMS41IDAtMi43IDEuMS0zIDIuN3MtLjMgMy0xLjMgNC0xLjMgMy0yLjcgMy0zIDIuNy0zIDMuNXMxLjEgMi43IDMgM2MzIC4zIDQgMS4zIDQgM3MxLjMgMi43IDIuNyAzIDMgMi43IDMgMy41LTEuMSAyLjctMyAzLTMgLjMtNC0xLjMtNC0zcy0uMy0yLjctMS4zLTRTMTEgMTYuNSA5IDE2LjVzLTEuMS0yLjctMy0zLTMtLjMtNC0xLjMtNC0zcy0uMy0yLjctMS4zLTRTMTEgMTMuNSA5IDEzLjVzLTEuMS0yLjctMy0zLTMtLjMtNC0xLjMtNC0zeiIgZmlsbD0iIzYzNjZmMSIvPgo8L3N2Zz4K';
+                  }}
                 />
                 <div>
                     <span className="text-white font-bold block leading-none">העוזר של דדי</span>

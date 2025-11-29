@@ -780,15 +780,55 @@ const AdminPanel: React.FC = () => {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-3xl font-bold">שיחות צ׳אט בוט</h2>
-                        <div className="relative">
-                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                type="text"
-                                placeholder="חפש שיחות..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="bg-slate-800 border border-white/10 rounded-full py-2 pr-10 pl-4 text-white focus:outline-none focus:border-blue-500 w-64 shadow-inner"
-                            />
+                        <div className="flex items-center gap-4">
+                            {/* Chatbot Source Toggle */}
+                            <div className="bg-slate-800/50 p-1 rounded-xl border border-white/10">
+                                <button
+                                    onClick={() => {
+                                        // Toggle between AI and local knowledge base
+                                        const newSource = (settings as any).chatbotSource === 'local' ? 'google' : 'local';
+                                        const updatedSettings = {...settings, chatbotSource: newSource};
+                                        setSettings(updatedSettings);
+                                        StorageService.saveSettings(updatedSettings);
+                                    }}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                                        (settings as any).chatbotSource === 'local'
+                                            ? 'bg-green-600 text-white shadow-lg'
+                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                    }`}
+                                >
+                                    {(settings as any).chatbotSource === 'local' ? '🧠 בסיס ידע מקומי' : '🤖 AI מתקדם'}
+                                </button>
+                            </div>
+
+                            <div className="relative">
+                                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="חפש שיחות..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="bg-slate-800 border border-white/10 rounded-full py-2 pr-10 pl-4 text-white focus:outline-none focus:border-blue-500 w-64 shadow-inner"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Status Indicator */}
+                    <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${(settings as any).chatbotSource === 'local' ? 'bg-green-500' : 'bg-blue-500'} animate-pulse`}></div>
+                            <div>
+                                <h3 className="font-bold text-white">
+                                    מצב צ׳אט בוט: {(settings as any).chatbotSource === 'local' ? 'בסיס ידע מקומי' : 'AI מתקדם (Gemini)'}
+                                </h3>
+                                <p className="text-sm text-slate-400">
+                                    {(settings as any).chatbotSource === 'local'
+                                        ? 'הבוט משתמש בבסיס ידע מקומי מהיר ואמין'
+                                        : 'הבוט משתמש בבינה מלאכותית מתקדמת עם למידה מתמשכת'
+                                    }
+                                </p>
+                            </div>
                         </div>
                     </div>
 
