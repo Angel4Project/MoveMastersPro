@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -89,33 +88,6 @@ const AdminPanel: React.FC = () => {
   // --- Actions ---
 
   // CRM Actions
-  const onDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-
-    if (!destination) return;
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    const newStatus = destination.droppableId as Lead['status'];
-
-    // Optimistically update local state
-    const updatedLeads = leads.map(l => 
-        l.id === draggableId ? { ...l, status: newStatus } : l
-    );
-    setLeads(updatedLeads);
-
-    // Update Storage
-    StorageService.updateLead(draggableId, { status: newStatus });
-    
-    if (selectedLead && selectedLead.id === draggableId) {
-        setSelectedLead({...selectedLead, status: newStatus});
-    }
-  };
 
   const moveLead = (id: string, newStatus: 'new' | 'in_progress' | 'closed') => {
     StorageService.updateLead(id, { status: newStatus });
@@ -408,75 +380,58 @@ const AdminPanel: React.FC = () => {
                     </div>
                 </div>
                 
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="grid grid-cols-3 gap-6 h-full items-start">
-                        {/* CRM Columns */}
-                        {[
-                            { id: 'new', label: 'לידים חדשים', color: 'red', icon: Users },
-                            { id: 'in_progress', label: 'בטיפול / מו"מ', color: 'blue', icon: Phone },
-                            { id: 'closed', label: 'עסקאות סגורות', color: 'green', icon: CheckCircle }
-                        ].map(col => (
-                            <Droppable droppableId={col.id} key={col.id}>
-                                {(provided) => (
-                                    <div 
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="bg-slate-800/50 rounded-2xl p-4 border border-white/5 h-full min-h-[500px]"
+                <div className="grid grid-cols-3 gap-6 h-full items-start">
+                    {/* CRM Columns */}
+                    {[
+                        { id: 'new', label: 'לידים חדשים', color: 'red', icon: Users },
+                        { id: 'in_progress', label: 'בטיפול / מו"מ', color: 'blue', icon: Phone },
+                        { id: 'closed', label: 'עסקאות סגורות', color: 'green', icon: CheckCircle }
+                    ].map(col => (
+                        <div
+                            key={col.id}
+                            className="bg-slate-800/50 rounded-2xl p-4 border border-white/5 h-full min-h-[500px]"
+                        >
+                            <div className={`flex items-center gap-2 mb-4 p-2 border-b border-white/5 pb-4`}>
+                                <div className={`p-2 rounded-lg bg-${col.color}-500/10 text-${col.color}-400`}>
+                                    <col.icon size={18} />
+                                </div>
+                                <h3 className="font-bold text-slate-200">{col.label}</h3>
+                                <span className="bg-slate-700 px-2 py-0.5 rounded-full text-xs ml-auto font-mono text-slate-300">
+                                    {filteredLeads.filter(l => l.status === col.id).length}
+                                </span>
+                            </div>
+                            <div className="space-y-3">
+                                {filteredLeads.filter(l => l.status === col.id).map((lead) => (
+                                    <div
+                                        key={lead.id}
+                                        onClick={() => setSelectedLead(lead)}
+                                        className="bg-slate-700 p-4 rounded-xl border border-white/5 shadow-lg hover:bg-slate-600 transition cursor-pointer group relative overflow-hidden"
                                     >
-                                        <div className={`flex items-center gap-2 mb-4 p-2 border-b border-white/5 pb-4`}>
-                                            <div className={`p-2 rounded-lg bg-${col.color}-500/10 text-${col.color}-400`}>
-                                                <col.icon size={18} />
-                                            </div>
-                                            <h3 className="font-bold text-slate-200">{col.label}</h3>
-                                            <span className="bg-slate-700 px-2 py-0.5 rounded-full text-xs ml-auto font-mono text-slate-300">
-                                                {filteredLeads.filter(l => l.status === col.id).length}
-                                            </span>
+                                        <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${col.color}-500`}></div>
+                                        <div className="flex justify-between items-start mb-2 pl-3">
+                                            <h4 className="font-bold text-white group-hover:text-blue-400 transition">{lead.name}</h4>
+                                            {lead.score !== undefined && (
+                                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${lead.score > 70 ? 'bg-green-500/20 text-green-400' : lead.score < 30 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                                    {lead.score}
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="space-y-3">
-                                            {filteredLeads.filter(l => l.status === col.id).map((lead, index) => (
-                                                <Draggable draggableId={lead.id} index={index}>
-                                                    {(provided) => (
-                                                        <div
-                                                            ref={provided.innerRef}
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            onClick={() => setSelectedLead(lead)}
-                                                            className="bg-slate-700 p-4 rounded-xl border border-white/5 shadow-lg hover:bg-slate-600 transition cursor-pointer group relative overflow-hidden"
-                                                            style={{
-                                                                ...provided.draggableProps.style
-                                                            }}
-                                                        >
-                                                            <div className={`absolute left-0 top-0 bottom-0 w-1 bg-${col.color}-500`}></div>
-                                                            <div className="flex justify-between items-start mb-2 pl-3">
-                                                                <h4 className="font-bold text-white group-hover:text-blue-400 transition">{lead.name}</h4>
-                                                                {lead.score !== undefined && (
-                                                                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${lead.score > 70 ? 'bg-green-500/20 text-green-400' : lead.score < 30 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                                                                        {lead.score}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <p className="text-xs text-slate-400 mb-3 pl-3 flex items-center gap-2">
-                                                                <span>{new Date(lead.createdAt).toLocaleDateString('he-IL')}</span>
-                                                                {lead.source && <span className="bg-slate-800 px-1 rounded uppercase text-[10px]">{lead.source}</span>}
-                                                            </p>
-                                                            <div className="flex justify-between items-center pl-3 border-t border-white/5 pt-3">
-                                                                <span className="font-bold text-slate-200">₪{lead.quote}</span>
-                                                                {lead.nextFollowUp && new Date(lead.nextFollowUp) <= new Date() && (
-                                                                    <div className="text-red-400 animate-pulse" title="דרוש טיפול היום"><AlertTriangle size={14} /></div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </Draggable>
-                                            ))}
-                                            {provided.placeholder}
+                                        <p className="text-xs text-slate-400 mb-3 pl-3 flex items-center gap-2">
+                                            <span>{new Date(lead.createdAt).toLocaleDateString('he-IL')}</span>
+                                            {lead.source && <span className="bg-slate-800 px-1 rounded uppercase text-[10px]">{lead.source}</span>}
+                                        </p>
+                                        <div className="flex justify-between items-center pl-3 border-t border-white/5 pt-3">
+                                            <span className="font-bold text-slate-200">₪{lead.quote}</span>
+                                            {lead.nextFollowUp && new Date(lead.nextFollowUp) <= new Date() && (
+                                                <div className="text-red-400 animate-pulse" title="דרוש טיפול היום"><AlertTriangle size={14} /></div>
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                            </Droppable>
-                        ))}
-                    </div>
-                </DragDropContext>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
                 {/* Lead Details Modal */}
                 <AnimatePresence>
