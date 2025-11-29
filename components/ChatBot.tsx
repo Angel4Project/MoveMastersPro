@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateAIResponse } from '../services/aiService';
 import { StorageService } from '../services/storage';
 import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 
@@ -216,8 +215,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     const settings = StorageService.getSettings();
     if (settings.aiApiKey) {
       try {
-        const aiReply = await generateAIResponse(text);
-        addBotMessage(aiReply);
+        const response = await fetch('/api/index', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: text })
+        });
+        const data = await response.json();
+        addBotMessage(data.response || "מתנצל, יש לי עומס כרגע.");
       } catch (e) {
         addBotMessage("מתנצל, יש לי עומס כרגע.");
       }

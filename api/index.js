@@ -369,7 +369,38 @@ export default async function handler(req, res) {
       });
     }
 
-    // Validate and sanitize input
+    // Check if this is an AI chat request
+    if (body.input && !body.name && !body.email && !body.phone && !body.message) {
+      // Handle AI chat request
+      try {
+        if (!process.env.GEMINI_API_KEY) {
+          throw new Error('GEMINI_API_KEY not configured');
+        }
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const prompt = `You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context.
+
+User question: "${body.input}"
+
+Respond in Hebrew with a helpful answer.`;
+
+        const result = await model.generateContent(prompt);
+        const response = result.response.text().trim();
+
+        return res.status(200).json({
+          success: true,
+          response: response
+        });
+      } catch (error) {
+        logger.error('AI chat processing failed', { error: error.message, input: body.input });
+        return res.status(200).json({
+          success: true,
+          response: "מתנצל, יש לי עומס כרגע."
+        });
+      }
+    }
+
+    // Validate and sanitize input for lead submission
     const validatedData = leadSchema.parse(body);
     const sanitizedData = {
       name: sanitizeInput(validatedData.name),
