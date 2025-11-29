@@ -6,6 +6,9 @@ import { StorageService } from '../services/storage';
 import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 import { useChat } from '../src/hooks/useChat';
 
+// Import avatar image
+const ChatBotAvatar = new URL('/images/עוזר-צ\'אט.png', import.meta.url).href;
+
 interface MessageAction {
   label: string;
   type: 'phone' | 'whatsapp' | 'link';
@@ -30,7 +33,7 @@ interface ChatBotProps {
 const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) => {
    const [internalIsOpen, setInternalIsOpen] = useState(false);
    const [conversationId, setConversationId] = useState<string>('');
-   const [isDarkMode, setIsDarkMode] = useState(false);
+   const [isDarkMode, setIsDarkMode] = useState(true);
 
    const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
    const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
@@ -314,7 +317,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">
                 <motion.img
-                  src="/images/עוזר-צ'אט.png"
+                  src={ChatBotAvatar}
                   alt="עוזר צ'אט"
                   className="w-8 h-8 rounded-full border-2 border-white/20"
                   animate={isTyping ? { scale: [1, 1.1, 1] } : {}}
@@ -344,9 +347,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
               {messages.map(msg => (
                 <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-start' : 'items-end'}`}>
                   <div className={`max-w-[85%] p-3 rounded-xl text-sm shadow-md ${
-                    msg.sender === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-none' 
-                      : 'bg-slate-700 text-slate-200 rounded-bl-none border border-white/5'
+                    msg.sender === 'user'
+                      ? 'bg-blue-600 text-white rounded-br-none'
+                      : isDarkMode
+                        ? 'bg-slate-700 text-slate-200 rounded-bl-none border border-white/5'
+                        : 'bg-gray-200 text-gray-800 rounded-bl-none border border-gray-300'
                   }`}>
                     {msg.text}
                   </div>
@@ -399,7 +404,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder={conversationStep === 'name' ? 'הקלד את שמך...' : conversationStep === 'phone' ? 'הקלד טלפון...' : "שאל אותי משהו..."}
-                className="flex-1 bg-slate-900 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 outline-none text-right"
+                className={`flex-1 text-sm rounded-lg px-3 py-2 border focus:border-blue-500 outline-none text-right ${
+                  isDarkMode
+                    ? 'bg-slate-900 text-white border-slate-600'
+                    : 'bg-white text-gray-800 border-gray-300'
+                }`}
                 autoFocus
               />
               <motion.button

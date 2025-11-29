@@ -1,12 +1,27 @@
 import React, { useState, Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Menu, X, Phone, Truck, Mail, MapPin, Shield, 
-  Facebook, Instagram, Twitter, MessageCircle, 
-  Clock, Star, Users, Zap, Eye
+import {
+  Menu, X, Phone, Truck, Mail, MapPin, Shield,
+  Facebook, Instagram, Twitter, MessageCircle,
+  Clock, Star, Users, Zap, Eye, Palette, Languages
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COMPANY_INFO } from './types';
+
+// Import images using Vite's asset handling
+const LogoImage = new URL('/images/לוגו.png', import.meta.url).href;
+
+// Google Translate type declarations
+declare global {
+  interface Window {
+    googleTranslateElementInit: () => void;
+    google: {
+      translate: {
+        TranslateElement: new (config: any, elementId: string) => any;
+      };
+    };
+  }
+}
 
 // Lazy Load Pages
 const Home = React.lazy(() => import('./pages/Home'));
@@ -66,6 +81,7 @@ const AdminBar = () => {
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('default');
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
@@ -76,6 +92,13 @@ const NavBar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Theme initialization
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'default';
+    setCurrentTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
   const links = [
@@ -108,7 +131,7 @@ const NavBar = () => {
             transition={{ duration: 0.3 }}
           >
             <img
-              src="/images/לוגו.png"
+              src={LogoImage}
               alt="לוגו הובלות המקצוען"
               className="w-12 h-12 rounded-xl object-contain group-hover:brightness-110 transition-all duration-300 shadow-[0_8px_32px_rgba(59,130,246,0.4)] border border-blue-400/30 group-hover:border-blue-300/50"
               onError={(e) => {
@@ -168,9 +191,57 @@ const NavBar = () => {
             </Link>
           ))}
           
+          {/* Theme & Translation Selectors */}
+          <div className="flex items-center gap-2 ml-4">
+            <button
+              onClick={() => {
+                const themes = ['default', 'dark', 'light', 'ocean'];
+                const currentIndex = themes.indexOf(currentTheme);
+                const nextTheme = themes[(currentIndex + 1) % themes.length];
+                setCurrentTheme(nextTheme);
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('theme', nextTheme);
+              }}
+              className="p-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
+              title={`ערכת צבעים: ${currentTheme}`}
+            >
+              <Palette size={18} />
+            </button>
+
+            <button
+              onClick={() => {
+                // Load Google Translate widget
+                if (!document.querySelector('#google-translate-script')) {
+                  const script = document.createElement('script');
+                  script.id = 'google-translate-script';
+                  script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                  document.head.appendChild(script);
+
+                  window.googleTranslateElementInit = () => {
+                    new window.google.translate.TranslateElement({
+                      pageLanguage: 'he',
+                      includedLanguages: 'en,he,ar,ru,fr,de,es',
+                      layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+                    }, 'google_translate_element');
+                  };
+                }
+
+                // Toggle translate widget
+                const translateElement = document.getElementById('google_translate_element');
+                if (translateElement) {
+                  translateElement.style.display = translateElement.style.display === 'none' ? 'block' : 'none';
+                }
+              }}
+              className="p-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
+              title="תרגום אתר"
+            >
+              <Languages size={18} />
+            </button>
+          </div>
+
           {/* CTA Button משופר */}
-          <Link 
-            to="/quote" 
+          <Link
+            to="/quote"
             className="group relative flex items-center gap-2 px-6 py-3 ml-4 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:scale-105 border border-blue-400/30 hover:border-blue-300/50"
           >
             <motion.div 
@@ -185,7 +256,7 @@ const NavBar = () => {
         </div>
 
         {/* Mobile Toggle משופר */}
-        <motion.button 
+        <motion.button
           className="md:hidden relative p-3 text-white hover:bg-white/10 rounded-xl transition-all duration-300 border border-white/10 hover:border-white/20"
           onClick={() => setIsOpen(!isOpen)}
           whileTap={{ scale: 0.95 }}
@@ -198,6 +269,9 @@ const NavBar = () => {
           </motion.div>
         </motion.button>
 
+        {/* Google Translate Element */}
+        <div id="google_translate_element" className="hidden md:block absolute top-full right-4 mt-2"></div>
+
         {/* Mobile Menu משופר */}
         <AnimatePresence>
           {isOpen && (
@@ -206,7 +280,7 @@ const NavBar = () => {
               animate={{ opacity: 1, height: 'auto', y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute top-24 left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[70]"
+              className="absolute top-full left-4 right-4 md:hidden bg-slate-900/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[999]"
             >
               <div className="flex flex-col p-4 gap-2">
                 {links.map((link, index) => (

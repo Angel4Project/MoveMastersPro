@@ -1,12 +1,15 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { 
-  PhoneCall, FileText, Box, Truck, Home, Target, Heart, Award, 
+import {
+  PhoneCall, FileText, Box, Truck, Home, Target, Heart, Award,
   Star, Users, Clock, MapPin, Mail, Phone, Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 // import { StorageService } from '../services/storage'; // Not used in this component
+
+// Import images using Vite's asset handling
+const DadiImage = new URL('/images/דדי.png', import.meta.url).href;
 
 const About: React.FC = () => {
   const ref = useRef(null);
@@ -19,7 +22,7 @@ const About: React.FC = () => {
       id: '1',
       name: 'דדי',
       role: 'מנכ״ל ובעלים',
-      image: '/images/דדי.png',
+      image: DadiImage,
       fallbackImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iMTAwIiBmaWxsPSIjMWU0MGFmIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iIzYzNjZmMSIvPgo8cGF0aCBkPSJNNTAgMTQwUTUwIDE2MCA3MCAxNjBMMTEwIDE2MFExMzAgMTYwIDEzMCAxNDBMMTMwIDEwMFExMzAgODAgMTEwIDgwTDcwIDgwUTEwMCA4MCAxMDAgMTAwTDEwMCAxNDBaIiBmaWxsPSIjNjM2NmYxIi8+Cjwvc3ZnPgo=',
       bio: 'דדי הוא המנהל והמוביל של המיזם, והוא אחראי לכל השירותים, הפיתוחים והפתרונות הדיגיטליים המוצעים באתר. האתר פותח על ידי ANGEL4PROJECT.',
       phone: '050-5350148',
