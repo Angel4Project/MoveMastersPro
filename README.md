@@ -274,6 +274,8 @@ npm run test:load
 
 ---
 
+<!-- Force Vercel cache refresh - Clean deployment without @hello-pangea/dnd -->
+
 <div align="center">
   <p>בנוי עם ❤️ בישראל</p>
   <p>
