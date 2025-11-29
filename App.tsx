@@ -17,7 +17,14 @@ declare global {
     googleTranslateElementInit: () => void;
     google: {
       translate: {
-        TranslateElement: new (config: any, elementId: string) => any;
+        TranslateElement: {
+          new (config: any, elementId: string): any;
+          InlineLayout: {
+            SIMPLE: string;
+            HORIZONTAL: string;
+            VERTICAL: string;
+          };
+        };
       };
     };
   }
@@ -221,7 +228,7 @@ const NavBar = () => {
                     new window.google.translate.TranslateElement({
                       pageLanguage: 'he',
                       includedLanguages: 'en,he,ar,ru,fr,de,es',
-                      layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+                      layout: (window.google.translate.TranslateElement as any).InlineLayout.SIMPLE
                     }, 'google_translate_element');
                   };
                 }

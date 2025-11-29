@@ -23,7 +23,6 @@ interface Message {
   actions?: MessageAction[];
 }
 
-type ConversationStep = 'idle' | 'name' | 'phone';
 
 interface ChatBotProps {
   isOpen?: boolean;
@@ -56,7 +55,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
    const [isTyping, setIsTyping] = useState(false);
 
    // Lead Capture State
-   const [conversationStep, setConversationStep] = useState<ConversationStep>('idle');
    const [leadData, setLeadData] = useState<{name: string, phone: string, email: string}>({ name: '', phone: '', email: '' });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -403,7 +401,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={conversationStep === 'name' ? 'הקלד את שמך...' : conversationStep === 'phone' ? 'הקלד טלפון...' : "שאל אותי משהו..."}
+                placeholder="שאל אותי משהו..."
                 className={`flex-1 text-sm rounded-lg px-3 py-2 border focus:border-blue-500 outline-none text-right ${
                   isDarkMode
                     ? 'bg-slate-900 text-white border-slate-600'
