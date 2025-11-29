@@ -136,6 +136,10 @@ export default defineConfig(({ mode }) => {
     // Resolve configuration
     resolve: {
       alias: {
+        // Force single React instance to fix forwardRef errors
+        'react': path.resolve(__dirname, 'node_modules/react'),
+        'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+        // Project aliases
         '@': path.resolve(__dirname, './'),
         '@components': path.resolve(__dirname, './components'),
         '@pages': path.resolve(__dirname, './pages'),
