@@ -1,0 +1,19 @@
+{
+  "name": "movemasterspro-api",
+  "version": "1.0.0",
+  "description": "Serverless API functions for MoveMastersPro",
+  "main": "index.js",
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "firebase": "^12.6.0",
+    "googleapis": "^166.0.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "winston": "^3.18.3",
+    "zod": "^4.1.13"
+  }
+}
