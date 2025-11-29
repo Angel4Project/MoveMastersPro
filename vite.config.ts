@@ -32,72 +32,35 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: !isProduction,
-      minify: isProduction ? 'esbuild' : false,
       chunkSizeWarningLimit: 1000,
       cssCodeSplit: true,
       reportCompressedSize: false,
       rollupOptions: {
         output: {
-          // Optimized manual chunks for better caching and loading
-          manualChunks: (id) => {
-            // Vendor chunks
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
-                return 'react-vendor';
-              }
-              if (id.includes('firebase')) {
-                return 'firebase-vendor';
-              }
-              if (id.includes('framer-motion') || id.includes('lucide-react')) {
-                return 'ui-vendor';
-              }
-              if (id.includes('react-router')) {
-                return 'router-vendor';
-              }
-              if (id.includes('@google') || id.includes('googleapis')) {
-                return 'google-vendor';
-              }
-              return 'vendor';
-            }
-
-            // Application chunks
-            if (id.includes('services/')) {
-              return 'services';
-            }
-            if (id.includes('components/')) {
-              return 'components';
-            }
-            if (id.includes('pages/')) {
-              return 'pages';
-            }
-            if (id.includes('context/')) {
-              return 'context';
-            }
+          // מבטל את ה-optimization המוגזם ששובר את forwardRef
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            redux: ['@reduxjs/toolkit', 'react-redux'],
           },
-          // Optimized asset naming with content hashing
-          assetFileNames: (assetInfo) => {
-            const name = assetInfo.name || '';
-            if (/\.(woff|woff2|eot|ttf|otf)$/i.test(name)) {
-              return `fonts/[name]-[hash][extname]`;
-            }
-            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(name)) {
-              return `images/[name]-[hash][extname]`;
-            }
-            return `assets/[name]-[hash][extname]`;
-          },
-          chunkFileNames: (chunkInfo) => {
-            const facadeModuleId = chunkInfo.facadeModuleId
-              ? chunkInfo.facadeModuleId.split('/').pop()?.replace('.tsx', '').replace('.ts', '')
-              : 'chunk';
-            return `js/${facadeModuleId}-[hash].js`;
-          },
-          entryFileNames: 'js/[name]-[hash].js'
+          // הגדרות נוספות לייצוב chunking וטיפול בקונפליקטים
+          chunkFileNames: 'js/[name]-[hash].js',
+          entryFileNames: 'js/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          // הוסף אופציות נוספות למניעת שגיאות
+          inlineDynamicImports: false
         },
         // External dependencies that shouldn't be bundled
         external: [
           '@google/genai',
           'winston'
         ]
+      },
+      // הוסף הגדרות build נוספות לייצוב
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true, // אופציונלי להפחתת גודל
+        },
       }
     },
 
@@ -209,17 +172,7 @@ export default defineConfig(({ mode }) => {
 
     // Performance optimizations
     optimizeDeps: {
-      include: [
-        'react',
-        'react-dom',
-        'react-router-dom',
-        'firebase/app',
-        'firebase/auth',
-        'firebase/firestore',
-        'framer-motion',
-        'lucide-react',
-        'zod'
-      ],
+      include: ['react', 'react-dom', '@reduxjs/toolkit', 'react-redux'],
       exclude: ['@vite/client', '@vite/env']
     },
 
