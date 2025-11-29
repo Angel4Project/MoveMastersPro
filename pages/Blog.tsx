@@ -43,10 +43,11 @@ const BlogModal: React.FC<BlogModalProps> = ({ post, isOpen, onClose }) => {
           >
             {/* Header */}
             <div className="relative">
-              <img 
-                src={post.image} 
-                alt={post.title} 
+              <img
+                src={post.image}
+                alt={post.title}
                 className="w-full h-64 md:h-80 object-cover"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
               
@@ -470,10 +471,11 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 
       <div className={viewMode === 'list' ? 'md:flex md:h-64' : ''}>
         <div className={`relative overflow-hidden ${viewMode === 'list' ? 'md:w-1/3' : ''}`}>
-          <img 
-            src={post.image} 
-            alt={post.title} 
+          <img
+            src={post.image}
+            alt={post.title}
             className="w-full h-48 md:h-full object-cover group-hover:scale-110 transition duration-700"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>

@@ -14,9 +14,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, login, logout } = useAuth();
+  const { isAuthenticated, login, logout, requires2FA, verify2FA, loginAttempts } = useAuth() as any;
   const [activeTab, setActiveTab] = useState<'dashboard' | 'crm' | 'marketing' | 'products' | 'blog' | 'chat' | 'settings'>('dashboard');
   const [loginPass, setLoginPass] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Data States
@@ -59,8 +60,14 @@ const AdminPanel: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!login(loginPass)) {
-      alert("סיסמה שגויה");
+    if (requires2FA) {
+      if (!verify2FA(twoFactorCode)) {
+        alert("קוד אימות שגוי");
+      }
+    } else {
+      if (!login(loginPass)) {
+        alert("סיסמה שגויה");
+      }
     }
   };
 
@@ -180,25 +187,43 @@ const AdminPanel: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="bg-slate-900/90 backdrop-blur-xl p-10 rounded-3xl border border-white/10 shadow-2xl w-full max-w-md space-y-6"
         >
           <div className="text-center">
             <h2 className="text-3xl font-black text-white mb-2">גישת מנהל</h2>
-            <p className="text-slate-400">הכנס סיסמה לגישה לפאנל הניהול</p>
+            <p className="text-slate-400">
+              {requires2FA ? 'הכנס קוד אימות דו-שלבי' : 'הכנס סיסמה לגישה לפאנל הניהול'}
+            </p>
+            {loginAttempts > 0 && (
+              <p className="text-red-400 text-sm mt-2">
+                ניסיונות כושלים: {loginAttempts}/5
+              </p>
+            )}
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
-            <input 
-              type="password" 
-              placeholder="סיסמה (123456)" 
-              value={loginPass}
-              onChange={e => setLoginPass(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white text-center text-lg tracking-widest focus:border-blue-500 outline-none transition"
-            />
+            {!requires2FA ? (
+              <input
+                type="password"
+                placeholder="סיסמה (123456)"
+                value={loginPass}
+                onChange={e => setLoginPass(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white text-center text-lg tracking-widest focus:border-blue-500 outline-none transition"
+              />
+            ) : (
+              <input
+                type="text"
+                placeholder="קוד אימות (123456)"
+                value={twoFactorCode}
+                onChange={e => setTwoFactorCode(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white text-center text-lg tracking-widest focus:border-blue-500 outline-none transition"
+                maxLength={6}
+              />
+            )}
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-900/50">
-              כניסה למערכת
+              {requires2FA ? 'אימות והכניסה' : 'כניסה למערכת'}
             </button>
             <button type="button" onClick={() => navigate('/')} className="w-full text-slate-500 text-sm hover:text-white transition">חזרה לאתר</button>
           </form>

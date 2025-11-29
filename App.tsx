@@ -102,14 +102,16 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex justify-between items-center relative z-10">
         {/* לוגו משופר */}
         <Link to="/" className="flex items-center gap-3 group">
-          <motion.div 
+          <motion.div
             className="relative"
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.6 }}
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300 shadow-[0_8px_32px_rgba(59,130,246,0.4)] border border-blue-400/30 group-hover:border-blue-300/50">
-              <Truck className="text-white drop-shadow-lg" size={28} />
-            </div>
+            <img
+              src="/images/לוגו.png"
+              alt="לוגו הובלות המקצוען"
+              className="w-12 h-12 rounded-xl object-contain group-hover:brightness-110 transition-all duration-300 shadow-[0_8px_32px_rgba(59,130,246,0.4)] border border-blue-400/30 group-hover:border-blue-300/50"
+            />
             {/* Glow effect */}
             <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </motion.div>
@@ -516,6 +518,35 @@ const Footer = () => {
             </motion.div>
           </div>
         </div>
+
+        {/* Newsletter Section */}
+        <motion.div
+          className="max-w-4xl mx-auto px-4 mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center">
+            <h3 className="text-2xl font-bold mb-4">הישאר מעודכן</h3>
+            <p className="text-slate-400 mb-6">קבל טיפים, מבצעים והודעות על שירותי ההובלות שלנו</p>
+            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="הכנס את כתובת האימייל שלך"
+                className="flex-1 px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:border-blue-500/50 focus:outline-none transition-all duration-300"
+                required
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all duration-300"
+              >
+                הרשם
+              </button>
+            </form>
+            <p className="text-xs text-slate-500 mt-4">אנו מכבדים את הפרטיות שלך ולא נשתף את המידע עם צדדים שלישיים.</p>
+          </div>
+        </motion.div>
 
         {/* Bottom Section */}
         <motion.div 

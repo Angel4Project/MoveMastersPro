@@ -378,24 +378,66 @@ export default async function handler(req, res) {
         }
 
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        const prompt = `You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context.
 
-User question: "${body.input}"
+        // System prompt for advanced AI assistant
+        const systemPrompt = `אתה עוזר דיגיטלי חכם לחברת הובלות בבעלות דדי. האתר נוצר על ידי ANGEL4PROJECT.
+תכונות עיקריות:
+- דבר עברית כברירת מחדל, אבל תמוך גם באנגלית אם המשתמש מבקש
+- היה מקצועי, קצר, עוזר ותן תשובות מלאות ומנומקות
+- הכר את דדי כבעלים ואת ANGEL4PROJECT כיוצר האתר
+- ספק הצעות מחיר דינמיות על בסיס נתונים: מחיר בסיס 800 ש״ח, 15 ש״ח לק״מ, 200 ש״ח לחדר, 50 ש״ח לקומה, 100 ש״ח למ״ק
+- זיהה אוטומטית שם, טלפון ואימייל מהשיחה ושמור לידים
+- השתמש בהיסטוריית שיחה להקשר רציף
+- תן תשובות מותאמות אישית על בסיס ההקשר
+- אם יש שאלה על מחיר, חשב הצעה מפורטת עם נימוקים
+- תמוך בפקודות קוליות בסיסיות אם מוזכרות
 
-Respond in Hebrew with a helpful answer.`;
+אם המשתמש מבקש הצעת מחיר, שאל על פרטים כמו מרחק, מספר חדרים, קומות וכו' וחשב מחיר.`;
+
+        // Include conversation history for context (last 10 messages)
+        let conversationContext = '';
+        if (body.conversation && Array.isArray(body.conversation)) {
+          const recentMessages = body.conversation.slice(-10);
+          conversationContext = recentMessages.map(msg =>
+            `${msg.sender === 'user' ? 'משתמש' : 'עוזר'}: ${msg.text}`
+          ).join('\n');
+        }
+
+        const prompt = `${systemPrompt}
+
+${conversationContext ? `היסטוריית שיחה:\n${conversationContext}\n\n` : ''}שאלת המשתמש: "${body.input}"
+
+ענה בעברית עם תשובה מועילה ומותאמת אישית. אם זה בקשה להצעת מחיר, כלול חישוב מפורט.`;
 
         const result = await model.generateContent(prompt);
         const response = result.response.text().trim();
 
+        // Check for lead information in the response or input
+        let leadDetected = null;
+        const nameMatch = body.input.match(/שמי\s+([א-ת\s]+)/i) || body.input.match(/אני\s+([א-ת\s]+)/i);
+        const phoneMatch = body.input.match(/(\d{3}-?\d{3}-?\d{4}|\d{10})/);
+        const emailMatch = body.input.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+
+        if (nameMatch || phoneMatch || emailMatch) {
+          leadDetected = {
+            name: nameMatch ? nameMatch[1].trim() : '',
+            phone: phoneMatch ? phoneMatch[1] : '',
+            email: emailMatch ? emailMatch[1] : '',
+            message: body.input,
+            source: 'chatbot_ai'
+          };
+        }
+
         return res.status(200).json({
           success: true,
-          response: response
+          response: response,
+          leadDetected: leadDetected
         });
       } catch (error) {
         logger.error('AI chat processing failed', { error: error.message, input: body.input });
         return res.status(200).json({
           success: true,
-          response: "מתנצל, יש לי עומס כרגע."
+          response: "מתנצל, יש לי עומס כרגע. אנא נסה שוב מאוחר יותר."
         });
       }
     }

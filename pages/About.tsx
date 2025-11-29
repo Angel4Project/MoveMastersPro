@@ -17,9 +17,9 @@ const About: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState([
     {
       id: '1',
-      name: 'דדי כהן',
+      name: 'דדי',
       role: 'מנכ״ל ובעלים',
-      image: '/images/dadi.jpg',
+      image: '/images/דדי.png',
       bio: 'דדי הוא המנהל והמוביל של המיזם, והוא אחראי לכל השירותים, הפיתוחים והפתרונות הדיגיטליים המוצעים באתר. האתר פותח על ידי ANGEL4PROJECT.',
       phone: '050-5350148',
       email: 'hovalotdedi@gmail.com',

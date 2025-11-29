@@ -1,9 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Phone } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Phone, Mic, MicOff, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StorageService } from '../services/storage';
 import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
+import { useChat } from '../src/hooks/useChat';
 
 interface MessageAction {
   label: string;
@@ -27,28 +28,33 @@ interface ChatBotProps {
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) => {
-  const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const [conversationId, setConversationId] = useState<string>('');
+   const [internalIsOpen, setInternalIsOpen] = useState(false);
+   const [conversationId, setConversationId] = useState<string>('');
+   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
-  const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: `שלום! אני העוזר הדיגיטלי של ${COMPANY_INFO.owner}. איך אפשר לעזור לך היום?`,
-      sender: 'bot',
-      actions: [
-        { label: 'חייג לדדי', type: 'phone', value: COMPANY_INFO.phone, icon: Phone },
-        { label: 'וואטסאפ', type: 'whatsapp', value: COMPANY_INFO.phone, icon: MessageCircle }
-      ]
-    }
-  ]);
-  const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  
-  // Lead Capture State
-  const [conversationStep, setConversationStep] = useState<ConversationStep>('idle');
-  const [leadData, setLeadData] = useState<{name: string, phone: string}>({ name: '', phone: '' });
+   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+   const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
+
+   // Use the chat hook
+   const { isListening, voiceError, startVoiceRecognition, stopVoiceRecognition, quickActions, sendMessage, detectLeadInfo } = useChat();
+
+   const [messages, setMessages] = useState<Message[]>([
+     {
+       id: 1,
+       text: `שלום! אני העוזר הדיגיטלי של ${COMPANY_INFO.owner}. איך אפשר לעזור לך היום?`,
+       sender: 'bot',
+       actions: [
+         { label: 'חייג לדדי', type: 'phone', value: COMPANY_INFO.phone, icon: Phone },
+         { label: 'וואטסאפ', type: 'whatsapp', value: COMPANY_INFO.phone, icon: MessageCircle }
+       ]
+     }
+   ]);
+   const [inputValue, setInputValue] = useState("");
+   const [isTyping, setIsTyping] = useState(false);
+
+   // Lead Capture State
+   const [conversationStep, setConversationStep] = useState<ConversationStep>('idle');
+   const [leadData, setLeadData] = useState<{name: string, phone: string, email: string}>({ name: '', phone: '', email: '' });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -116,12 +122,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     saveMessageToConversation(newMessage);
   };
 
-  const saveLeadToCRM = (name: string, phone: string) => {
+  const saveLeadToCRM = (name: string, phone: string, email: string = '') => {
     const newLead: Lead = {
       id: Date.now().toString(),
       name: name,
       phone: phone,
-      email: '',
+      email: email,
       date: new Date().toLocaleDateString('he-IL'),
       distance: 0, rooms: 0, floor: 0, elevator: false, crane: false, packing: false, volume: 0, items: [], quote: 0,
       status: 'new',
@@ -136,7 +142,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
       StorageService.updateChatConversation(conversationId, {
         leadCreated: true,
         leadId: newLead.id,
-        userInfo: { name, phone }
+        userInfo: { name, phone, email }
       });
     }
   };
@@ -234,6 +240,18 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     }
   };
 
+  const handleVoiceResult = (transcript: string) => {
+    setInputValue(transcript);
+    // Optionally auto-send
+    // handleSend();
+  };
+
+  const handleQuickAction = (action: any) => {
+    setInputValue(action.value);
+    // Auto send quick actions
+    setTimeout(() => handleSend(), 100);
+  };
+
   const handleSend = async () => {
     if (!inputValue.trim()) return;
     const userMsg: Message = { id: Date.now(), text: inputValue, sender: 'user' };
@@ -242,7 +260,40 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     setInputValue("");
     setIsTyping(true);
 
-    await handleStepLogic(inputValue);
+    // Detect lead info
+    const detectedLead = detectLeadInfo(inputValue);
+    if (detectedLead.name) setLeadData(prev => ({ ...prev, name: detectedLead.name }));
+    if (detectedLead.phone) setLeadData(prev => ({ ...prev, phone: detectedLead.phone }));
+    if (detectedLead.email) setLeadData(prev => ({ ...prev, email: detectedLead.email }));
+
+    // Try AI first
+    const settings = StorageService.getSettings();
+    if (settings.aiApiKey) {
+      try {
+        const data = await sendMessage(inputValue, messages);
+        if (data.success) {
+          addBotMessage(data.response);
+          // Handle lead from AI
+          if (data.leadDetected) {
+            const lead = data.leadDetected;
+            setLeadData(prev => ({
+              name: lead.name || prev.name,
+              phone: lead.phone || prev.phone,
+              email: lead.email || prev.email
+            }));
+            if (lead.name && lead.phone) {
+              saveLeadToCRM(lead.name, lead.phone, lead.email);
+            }
+          }
+        } else {
+          await handleStepLogic(inputValue);
+        }
+      } catch (e) {
+        await handleStepLogic(inputValue);
+      }
+    } else {
+      await handleStepLogic(inputValue);
+    }
 
     setIsTyping(false);
   };
@@ -255,22 +306,35 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 w-80 sm:w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4"
+            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-80 sm:w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4`}
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
+                <motion.img
+                  src="/images/עוזר-צ'אט.png"
+                  alt="עוזר צ'אט"
+                  className="w-8 h-8 rounded-full border-2 border-white/20"
+                  animate={isTyping ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.5, repeat: isTyping ? Infinity : 0 }}
+                />
                 <div>
                     <span className="text-white font-bold block leading-none">העוזר של דדי</span>
                     <span className="text-blue-200 text-xs">מחובר כעת</span>
                 </div>
               </div>
-              <button onClick={() => onToggle ? onToggle() : setInternalIsOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="text-white/80 hover:text-white p-1"
+                  title={isDarkMode ? 'מצב בהיר' : 'מצב כהה'}
+                >
+                  {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
+                <button onClick={() => onToggle ? onToggle() : setInternalIsOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
+              </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900/50">
+            <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50/50'}`}>
               {messages.map(msg => (
                 <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-start' : 'items-end'}`}>
                   <div className={`max-w-[85%] p-3 rounded-xl text-sm shadow-md ${
@@ -304,9 +368,27 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-3 bg-slate-800 border-t border-white/10 flex gap-2">
-              <input 
-                type="text" 
+            {/* Quick Actions */}
+            <div className="px-3 py-2 bg-slate-800/50 border-t border-white/5">
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {quickActions.map((action, idx) => (
+                  <motion.button
+                    key={idx}
+                    onClick={() => handleQuickAction(action)}
+                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs px-3 py-1.5 rounded-full transition-colors whitespace-nowrap"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span>{action.icon}</span>
+                    {action.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            <div className={`p-3 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} border-t border-white/10 flex gap-2`}>
+              <input
+                type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -314,8 +396,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                 className="flex-1 bg-slate-900 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 outline-none text-right"
                 autoFocus
               />
+              <motion.button
+                onClick={() => isListening ? stopVoiceRecognition() : startVoiceRecognition(handleVoiceResult)}
+                className={`p-2 rounded-lg transition-colors ${isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-slate-600 hover:bg-slate-500 text-white'}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title={isListening ? 'עצור הקלטה' : 'התחל הקלטה קולית'}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </motion.button>
               <button onClick={handleSend} className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg"><Send size={18} /></button>
             </div>
+
+            {voiceError && (
+              <div className="px-3 pb-2 text-red-400 text-xs">
+                {voiceError}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
