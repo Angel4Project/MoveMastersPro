@@ -43,7 +43,7 @@ const createRateLimiter = (config: {
     skipSuccessfulRequests: config.skipSuccessfulRequests || false,
     skipFailedRequests: config.skipFailedRequests || false,
     keyGenerator: config.keyGenerator || ((req: Request) => req.ip || req.connection.remoteAddress || 'unknown'),
-    handler: config.handler || ((req: Request, res: Response, next: NextFunction) => {
+    handler: config.handler || ((req: Request, res: Response) => {
       const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
       const userAgent = req.get('User-Agent') || 'unknown';
       const url = req.originalUrl || req.url;
@@ -136,7 +136,6 @@ export const securityHeaders = helmet({
   xssFilter: true,
   noSniff: true,
   hidePoweredBy: true,
-  noindex: process.env.NODE_ENV === 'production',
   permittedCrossDomainPolicies: false
 });
 
@@ -181,7 +180,7 @@ export const corsOptions = {
 };
 
 // Input sanitization middleware
-export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
   const sanitizeString = (str: any): any => {
     if (typeof str !== 'string') return str;
     
@@ -226,7 +225,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   const requestId = Math.random().toString(36).substr(2, 9);
 
   res.setHeader('X-Request-ID', requestId);
-  req.requestStartTime = startTime;
+  (req as any).requestStartTime = startTime;
 
   logger.info('Incoming request', {
     requestId,
@@ -285,7 +284,7 @@ export const performanceMonitor = (req: Request, res: Response, next: NextFuncti
 };
 
 // Error handling middleware
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
   const requestId = req.get('X-Request-ID') || 'unknown';
   
   logger.error('Unhandled error', {

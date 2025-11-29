@@ -18,7 +18,7 @@ export const generateAIResponse = async (userPrompt: string): Promise<string> =>
         model: settings.aiModel || 'gemini-2.5-flash',
         contents: userPrompt,
         config: {
-          systemInstruction: "You are 'HaMiktzoan AI', a senior logistics expert for a moving company. Speak Hebrew. Be professional, concise, and helpful.",
+          systemInstruction: "You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context.",
         }
       });
       return response.text || "שגיאה בקבלת תשובה.";
@@ -39,7 +39,7 @@ export const generateAIResponse = async (userPrompt: string): Promise<string> =>
       body: JSON.stringify({
         model: settings.aiModel || (settings.aiProvider === 'openai' ? 'gpt-3.5-turbo' : 'mistralai/mistral-7b-instruct'),
         messages: [
-          { role: 'system', content: "You are 'HaMiktzoan AI', a logistics expert. Speak Hebrew." },
+          { role: 'system', content: "You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context." },
           { role: 'user', content: userPrompt }
         ]
       })

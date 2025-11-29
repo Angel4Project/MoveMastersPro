@@ -65,14 +65,14 @@ const Accessibility: React.FC<AccessibilityProps> = ({ onToggleContrast, onToggl
     };
   }, [isReadingMode, isDyslexicFont, isHighSaturation, isMonochrome, isInverted, zoomLevel]);
 
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window && isTextToSpeech) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = speechRate;
-      utterance.lang = 'he-IL'; // Hebrew
-      speechSynthesis.speak(utterance);
-    }
-  };
+  // const speakText = (text: string) => { // Not currently used
+    // if ('speechSynthesis' in window && isTextToSpeech) {
+    //   const utterance = new SpeechSynthesisUtterance(text);
+    //   utterance.rate = speechRate;
+    //   utterance.lang = 'he-IL'; // Hebrew
+    //   speechSynthesis.speak(utterance);
+    // }
+  // };
 
   const resetAll = () => {
     setIsReadingMode(false);

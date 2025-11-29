@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X, Phone, Mail, MessageCircle, Clock, MapPin,
-  User, MessageSquare, Calendar, CheckCircle, ExternalLink
+  X, Phone, Mail, MessageCircle, Clock,
+  User, MessageSquare, Calendar, CheckCircle
 } from 'lucide-react';
 import { StorageService } from '../services/storage';
 
@@ -73,7 +73,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
       await StorageService.saveContactForm(
         formData.name,
         formData.phone,
-        formData.email || '',
+        '', // Email field not implemented yet
         formData.message
       );
       alert('ההודעה נשלחה בהצלחה! נחזור אליך בהקדם.');

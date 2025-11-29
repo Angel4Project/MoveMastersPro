@@ -3,10 +3,10 @@ import React, { useRef, useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { 
   PhoneCall, FileText, Box, Truck, Home, Target, Heart, Award, 
-  Star, Users, Clock, MapPin, Mail, Phone, Plus, Edit, X 
+  Star, Users, Clock, MapPin, Mail, Phone, Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { StorageService } from '../services/storage';
+// import { StorageService } from '../services/storage'; // Not used in this component
 
 const About: React.FC = () => {
   const ref = useRef(null);
@@ -20,34 +20,10 @@ const About: React.FC = () => {
       name: 'דדי כהן',
       role: 'מנכ״ל ובעלים',
       image: '/images/dadi.jpg',
-      bio: 'המוביל את חברת הובלות המקצוען מאז הקמתה ב-2010. מעל 14 שנות ניסיון בתחום.',
+      bio: 'דדי הוא המנהל והמוביל של המיזם, והוא אחראי לכל השירותים, הפיתוחים והפתרונות הדיגיטליים המוצעים באתר. האתר פותח על ידי ANGEL4PROJECT.',
       phone: '050-5350148',
       email: 'hovalotdedi@gmail.com',
       isOwner: true
-    },
-    { 
-      id: '2', 
-      name: 'אבי לוי', 
-      role: 'מנהל תפעול', 
-      image: 'https://randomuser.me/api/portraits/men/2.jpg',
-      bio: 'אחראי על תיאום וניהול הפרויקטים היומיומיים',
-      isOwner: false
-    },
-    { 
-      id: '3', 
-      name: 'שרה ישראלי', 
-      role: 'שירות לקוחות', 
-      image: 'https://randomuser.me/api/portraits/women/3.jpg',
-      bio: 'מתמחה בליווי לקוחות ומתן שירות מעולה',
-      isOwner: false
-    },
-    { 
-      id: '4', 
-      name: 'דני רופ', 
-      role: 'ראש צוות הובלות', 
-      image: 'https://randomuser.me/api/portraits/men/4.jpg',
-      bio: 'מנהל את צוותי ההובלה והאריזה המקצועיים',
-      isOwner: false
     },
   ]);
 
@@ -227,7 +203,7 @@ const About: React.FC = () => {
                 צוות מקצועי ומנוסה שמחויב לשירות מעולה
               </motion.p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-8 max-w-md mx-auto">
                   {teamMembers.map((member, idx) => (
                       <motion.div 
                         key={member.id}

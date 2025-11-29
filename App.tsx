@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } f
 import { 
   Menu, X, Phone, Truck, Mail, MapPin, Shield, 
   Facebook, Instagram, Twitter, MessageCircle, 
-  Clock, Star, Users, Zap, Eye, Ear
+  Clock, Star, Users, Zap, Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COMPANY_INFO } from './types';
@@ -27,7 +27,7 @@ import { ChatBotProvider, useChatBot } from './context/ChatBotContext';
 import { googleSheetsService } from './services/googleSheetsService';
 import { emailService } from './services/emailService';
 import { whatsappService } from './services/whatsappService';
-import { analyticsService } from './services/analyticsService';
+// import { analyticsService } from './services/analyticsService'; // Not used in this component
 import { configService } from './services/configService';
 
 const LoadingFallback = () => (
@@ -121,7 +121,7 @@ const NavBar = () => {
 
         {/* Desktop Menu משופר */}
         <div className="hidden md:flex gap-1 items-center">
-          {links.map((link, index) => (
+          {links.map((link) => (
             <Link 
               key={link.path} 
               to={link.path}

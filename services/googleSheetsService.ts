@@ -1,4 +1,4 @@
-import { Lead, ChatConversation, Testimonial } from '../types';
+import { Lead, ChatConversation } from '../types';
 import { configService } from './configService';
 
 interface GoogleSheetsConfig {

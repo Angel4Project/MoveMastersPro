@@ -1,13 +1,12 @@
-import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   const isProduction = mode === 'production';
-  
+
   return {
     // Development server configuration
     server: {
@@ -75,12 +74,11 @@ export default defineConfig(({ mode }) => {
           },
           // Optimized asset naming with content hashing
           assetFileNames: (assetInfo) => {
-            const info = assetInfo.name?.split('.') || [];
-            const ext = info[info.length - 1];
-            if (/\.(woff|woff2|eot|ttf|otf)$/i.test(assetInfo.name || '')) {
+            const name = assetInfo.name || '';
+            if (/\.(woff|woff2|eot|ttf|otf)$/i.test(name)) {
               return `fonts/[name]-[hash][extname]`;
             }
-            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name || '')) {
+            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(name)) {
               return `images/[name]-[hash][extname]`;
             }
             return `assets/[name]-[hash][extname]`;

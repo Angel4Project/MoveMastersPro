@@ -1,5 +1,3 @@
-import { ReactNode } from 'react';
-
 export interface Lead {
   id: string;
   name: string;
@@ -135,7 +133,7 @@ export interface MessageAction {
   label: string;
   type: 'phone' | 'whatsapp' | 'link';
   value: string;
-  icon?: any;
+  icon?: React.ReactElement | string;
 }
 
 export const COMPANY_INFO = {

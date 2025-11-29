@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
 import { z } from 'zod';
 import { validationService } from '../services/validationService';
 import { rateLimitService } from '../services/rateLimitService';
-import { configService } from '../services/configService';
+// import { configService } from '../services/configService'; // Not used in this component
 
 // Firebase config validation
 const firebaseConfig = {
@@ -159,15 +159,15 @@ const LoadingSpinner: React.FC<{ size?: 'sm' | 'md' | 'lg'; text?: string }> = (
   size = 'md', 
   text = 'טוען...' 
 }) => {
-  const sizeClasses = {
+  const sizeClass = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
     lg: 'w-12 h-12'
-  };
+  }[size];
 
   return (
     <div className="flex items-center justify-center p-4">
-      <div className="animate-spin rounded-full border-b-2 border-blue-600 ${sizeClasses[size]}"></div>
+      <div className={`animate-spin rounded-full border-b-2 border-blue-600 ${sizeClass}`}></div>
       {text && <span className="mr-2 text-gray-600">{text}</span>}
     </div>
   );
@@ -239,7 +239,7 @@ const LeadForm: React.FC<{
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    if (touched[name]) {
+    if (touched[name as keyof typeof touched]) {
       validateField(name as keyof FormData, value);
     }
   }, [touched, validateField]);
@@ -698,7 +698,7 @@ const LeadSystem: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [aiResult, setAiResult] = useState<ApiResponse['data']['ai'] | null>(null);
+  const [aiResult, setAiResult] = useState<{ classification: string; sentiment: string; urgency: number } | null>(null);
   const [toast, setToast] = useState<ToastProps | null>(null);
 
   // Show toast helper

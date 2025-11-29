@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Truck, X, ArrowLeft, Sparkles } from 'lucide-react';
+import { Truck, X, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const WelcomeModal: React.FC = () => {

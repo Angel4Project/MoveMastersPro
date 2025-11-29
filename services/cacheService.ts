@@ -103,7 +103,7 @@ class CacheService {
     let expiredEntries = 0;
     let totalSize = 0;
 
-    for (const [key, entry] of this.cache.entries()) {
+    for (const entry of this.cache.values()) {
       if (now - entry.timestamp > entry.ttl) {
         expiredEntries++;
       } else {

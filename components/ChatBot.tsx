@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Phone, Sparkles, User, FileText } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateAIResponse } from '../services/aiService';
 import { StorageService } from '../services/storage';
@@ -34,9 +34,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const toggleOpen = onToggle || (() => setInternalIsOpen(!internalIsOpen));
   const [messages, setMessages] = useState<Message[]>([
-    { 
-      id: 1, 
-      text: `שלום! אני העוזר הדיגיטלי של ${COMPANY_INFO.owner}. כאן לשירותך 24/7.`, 
+    {
+      id: 1,
+      text: `שלום! אני העוזר הדיגיטלי של ${COMPANY_INFO.owner}. איך אפשר לעזור לך היום?`,
       sender: 'bot',
       actions: [
         { label: 'חייג לדדי', type: 'phone', value: COMPANY_INFO.phone, icon: Phone },
@@ -102,7 +102,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             name: leadData.name,
             phone: leadData.phone
           } : undefined,
-          leadCreated: conversation.leadCreated || (leadData.name && leadData.phone),
+          leadCreated: conversation.leadCreated || Boolean(leadData.name && leadData.phone),
           status: 'active' as const
         };
 
@@ -155,12 +155,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
 
     // 2. Handling Phone Input
     if (conversationStep === 'phone') {
-      const phoneRegex = /\b05\d-?\d{7}\b/;
-      if (phoneRegex.test(text) || text.length >= 9) {
+      const phoneRegex = /^05\d-?\d{7}$/;
+      const cleanPhone = text.replace(/[-\s]/g, '');
+      if (phoneRegex.test(text) || (cleanPhone.length === 10 && cleanPhone.startsWith('05'))) {
         setLeadData(prev => ({ ...prev, phone: text }));
         // Save to CRM
         saveLeadToCRM(leadData.name, text);
-        
+
         setConversationStep('idle');
         setTimeout(() => {
           addBotMessage("מעולה! שמרתי את הפרטים שלך. דדי יצור איתך קשר בהקדם.", [
@@ -169,7 +170,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
         }, 500);
       } else {
         setTimeout(() => {
-          addBotMessage("המספר נראה לא תקין. אנא נסה שוב (לדוגמה: 050-1234567)");
+          addBotMessage("המספר נראה לא תקין. בבקשה בדוק שוב ונסה להקליד את המספר הנכון (לדוגמה: 050-1234567).");
         }, 500);
       }
       return;
@@ -200,6 +201,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     }
     if (/אזורים|רעננה/.test(lowerText)) {
         setTimeout(() => addBotMessage(`אנחנו יושבים ב${COMPANY_INFO.address} ועובדים בכל הארץ.`), 600);
+        return;
+    }
+    if (/angel4project|מי יצר|מי פיתח|מי בנה/.test(lowerText)) {
+        setTimeout(() => addBotMessage("האתר הזה פותח על ידי ANGEL4PROJECT, מומחה לפיתוח אתרים ופתרונות דיגיטליים מתקדמים."), 600);
+        return;
+    }
+    if (/מה זה האתר|אודות האתר|על האתר/.test(lowerText)) {
+        setTimeout(() => addBotMessage("האתר הזה נבנה על ידי ANGEL4PROJECT, ומספק מגוון שירותים מתקדמים בתחום יצירת אתרים, פיתוח פתרונות דיגיטליים והובלות מקצועיות."), 600);
         return;
     }
 
@@ -235,18 +244,20 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
   };
 
   return (
-    <div className="fixed bottom-24 left-6 z-50 font-sans">
+    <div className="fixed bottom-24 left-4 sm:left-6 z-50 font-sans">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4"
+            className="bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 w-80 sm:w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4"
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">
-                <Bot className="w-6 h-6 text-white" />
+                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
                 <div>
                     <span className="text-white font-bold block leading-none">העוזר של דדי</span>
                     <span className="text-blue-200 text-xs">מחובר כעת</span>
