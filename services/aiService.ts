@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { StorageService } from "./storage";
 
 export const generateAIResponse = async (userPrompt: string): Promise<string> => {
@@ -13,15 +13,15 @@ export const generateAIResponse = async (userPrompt: string): Promise<string> =>
   try {
     // 1. Google Gemini Logic
     if (settings.aiProvider === 'google') {
-      const ai = new GoogleGenAI({ apiKey: settings.aiApiKey });
-      const response = await ai.models.generateContent({
+      const genAI = new GoogleGenerativeAI(settings.aiApiKey);
+      const model = genAI.getGenerativeModel({
         model: settings.aiModel || 'gemini-2.5-flash',
-        contents: userPrompt,
-        config: {
-          systemInstruction: "You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context.",
-        }
+        systemInstruction: "You are an intelligent digital assistant for a moving company owned by DADI. The website was created by ANGEL4PROJECT. Speak Hebrew. Recognize DADI as the owner and ANGEL4PROJECT as the creator. Be professional, concise, helpful, and provide personalized responses based on context.",
       });
-      return response.text || "שגיאה בקבלת תשובה.";
+
+      const result = await model.generateContent(userPrompt);
+      const response = await result.response;
+      return response.text() || "שגיאה בקבלת תשובה.";
     }
 
     // 2. OpenAI / OpenRouter Logic (Compatible APIs)

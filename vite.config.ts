@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
         },
         // External dependencies that shouldn't be bundled
         external: [
-          '@google/genai',
+          '@google/generative-ai',
           'winston'
         ]
       },

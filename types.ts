@@ -129,6 +129,8 @@ export interface ChatConversation {
   status: 'active' | 'completed' | 'archived';
 }
 
+import React from 'react';
+
 export interface MessageAction {
   label: string;
   type: 'phone' | 'whatsapp' | 'link';

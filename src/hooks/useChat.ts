@@ -1,9 +1,31 @@
 import { useState, useCallback, useRef } from 'react';
 
+interface MessageAction {
+  label: string;
+  type: 'phone' | 'whatsapp' | 'link';
+  value: string;
+  icon?: string;
+}
+
+interface Message {
+  id: number;
+  text: string;
+  sender: 'user' | 'bot';
+  actions?: MessageAction[];
+}
+
+// Extend window interface for speech recognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export const useChat = () => {
   const [isListening, setIsListening] = useState(false);
-  const [voiceError, setVoiceError] = useState(null);
-  const recognitionRef = useRef(null);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Voice recognition setup
   const initVoiceRecognition = useCallback(() => {
@@ -29,7 +51,7 @@ export const useChat = () => {
       setIsListening(false);
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       setVoiceError(`שגיאה בזיהוי קול: ${event.error}`);
       setIsListening(false);
     };
@@ -38,11 +60,11 @@ export const useChat = () => {
     return recognition;
   }, []);
 
-  const startVoiceRecognition = useCallback((onResult) => {
+  const startVoiceRecognition = useCallback((onResult: (transcript: string) => void) => {
     const recognition = recognitionRef.current || initVoiceRecognition();
     if (!recognition) return;
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       onResult(transcript);
     };
@@ -69,7 +91,7 @@ export const useChat = () => {
   ];
 
   // Send message with conversation history
-  const sendMessage = useCallback(async (input, conversation = []) => {
+  const sendMessage = useCallback(async (input: string, conversation: Message[] = []) => {
     try {
       const response = await fetch('/api/index', {
         method: 'POST',
@@ -92,7 +114,7 @@ export const useChat = () => {
   }, []);
 
   // Lead detection helper
-  const detectLeadInfo = useCallback((text) => {
+  const detectLeadInfo = useCallback((text: string) => {
     const nameMatch = text.match(/שמי\s+([א-ת\s]+)/i) || text.match(/אני\s+([א-ת\s]+)/i);
     const phoneMatch = text.match(/(\d{3}-?\d{3}-?\d{4}|\d{10}|\d{2,3}-\d{7})/);
     const emailMatch = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
