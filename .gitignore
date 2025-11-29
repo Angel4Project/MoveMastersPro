@@ -117,3 +117,4 @@ playwright/.cache/
 
 # Performance monitoring
 lighthouse/
+.env*.local
