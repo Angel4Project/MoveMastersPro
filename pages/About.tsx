@@ -8,8 +8,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 // import { StorageService } from '../services/storage'; // Not used in this component
 
-// Import images using Vite's asset handling
-const DadiImage = new URL('/images/dadi.png', import.meta.url).href;
+// Import images using reliable static paths
+const DadiImage = '/images/dadi.png';
 
 const About: React.FC = () => {
   const ref = useRef(null);
@@ -254,6 +254,7 @@ const About: React.FC = () => {
                                   <img
                                     src={member.image}
                                     alt={member.name}
+                                    loading="lazy"
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700"
                                     onError={(e) => {
                                       if (member.fallbackImage) {

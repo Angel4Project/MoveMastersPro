@@ -6,8 +6,8 @@ import { StorageService } from '../services/storage';
 import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
 import { useChat } from '../src/hooks/useChat';
 
-// Import avatar image
-const ChatBotAvatar = new URL('/images/assistant-avatar.png', import.meta.url).href;
+// Import avatar image using reliable static paths
+const ChatBotAvatar = '/images/assistant-avatar.png';
 
 interface MessageAction {
   label: string;
@@ -318,6 +318,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
                 <motion.img
                   src={ChatBotAvatar}
                   alt="עוזר צ'אט"
+                  loading="lazy"
                   className="w-8 h-8 rounded-full border-2 border-white/20"
                   animate={isTyping ? { scale: [1, 1.1, 1] } : {}}
                   transition={{ duration: 0.5, repeat: isTyping ? Infinity : 0 }}
