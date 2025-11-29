@@ -14,7 +14,7 @@ const About: React.FC = () => {
   const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   const { isAuthenticated } = useAuth();
   
-  const [teamMembers, setTeamMembers] = useState([
+  const [teamMembers] = useState([
     {
       id: '1',
       name: 'דדי',

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Phone, Mic, MicOff, Sun, Moon } from 'lucide-react';
+import { MessageCircle, X, Send, Phone, Mic, MicOff, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StorageService } from '../services/storage';
 import { COMPANY_INFO, Lead, ChatConversation, ChatMessage } from '../types';
@@ -233,98 +233,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
     }
   };
 
-  const handleStepLogic = async (text: string) => {
-    // 1. Handling Name Input
-    if (conversationStep === 'name') {
-      setLeadData(prev => ({ ...prev, name: text }));
-      setConversationStep('phone');
-      setTimeout(() => {
-        addBotMessage(`נעים להכיר, ${text}. מה מספר הטלפון שלך לחזרה?`);
-      }, 500);
-      return;
-    }
-
-    // 2. Handling Phone Input
-    if (conversationStep === 'phone') {
-      const phoneRegex = /^05\d-?\d{7}$/;
-      const cleanPhone = text.replace(/[-\s]/g, '');
-      if (phoneRegex.test(text) || (cleanPhone.length === 10 && cleanPhone.startsWith('05'))) {
-        setLeadData(prev => ({ ...prev, phone: text }));
-        // Save to CRM
-        saveLeadToCRM(leadData.name, text);
-
-        setConversationStep('idle');
-        setTimeout(() => {
-          addBotMessage("מעולה! שמרתי את הפרטים שלך. דדי יצור איתך קשר בהקדם.", [
-             { label: 'חייג עכשיו', type: 'phone', value: COMPANY_INFO.phone, icon: Phone }
-          ]);
-        }, 500);
-      } else {
-        setTimeout(() => {
-          addBotMessage("המספר נראה לא תקין. בבקשה בדוק שוב ונסה להקליד את המספר הנכון (לדוגמה: 050-1234567).");
-        }, 500);
-      }
-      return;
-    }
-
-    // 3. IDLE State - Intent Detection
-    const lowerText = text.toLowerCase();
-    
-    // Check for moving intent triggers
-    if (/הובלה|מעבר|מחיר|הצעת|להזמין|פנוי|מתי|quote|move/.test(lowerText) && conversationStep === 'idle') {
-        setConversationStep('name');
-        setTimeout(() => {
-            addBotMessage("אשמח לעזור לך עם הצעת מחיר! איך קוראים לך?");
-        }, 600);
-        return;
-    }
-
-    // Regex Q&A
-    if (/ביטוח|אחריות/.test(lowerText)) {
-        setTimeout(() => addBotMessage("בוודאי! כל הובלה כוללת ביטוח תכולה מלא עד 100,000 ש״ח."), 600);
-        return;
-    }
-    if (/טלפון|דדי/.test(lowerText)) {
-        setTimeout(() => addBotMessage(`ניתן להשיג את דדי ב-${COMPANY_INFO.phone}.`, [
-            { label: 'חייג', type: 'phone', value: COMPANY_INFO.phone, icon: Phone }
-        ]), 600);
-        return;
-    }
-    if (/אזורים|רעננה/.test(lowerText)) {
-        setTimeout(() => addBotMessage(`אנחנו יושבים ב${COMPANY_INFO.address} ועובדים בכל הארץ.`), 600);
-        return;
-    }
-    if (/angel4project|מי יצר|מי פיתח|מי בנה/.test(lowerText)) {
-        setTimeout(() => addBotMessage("האתר הזה פותח על ידי ANGEL4PROJECT, מומחה לפיתוח אתרים ופתרונות דיגיטליים מתקדמים."), 600);
-        return;
-    }
-    if (/מה זה האתר|אודות האתר|על האתר/.test(lowerText)) {
-        setTimeout(() => addBotMessage("האתר הזה נבנה על ידי ANGEL4PROJECT, ומספק מגוון שירותים מתקדמים בתחום יצירת אתרים, פיתוח פתרונות דיגיטליים והובלות מקצועיות."), 600);
-        return;
-    }
-
-    // AI Fallback
-    const settings = StorageService.getSettings();
-    if (settings.aiApiKey) {
-      try {
-        const response = await fetch('/api/index', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ input: text })
-        });
-        const data = await response.json();
-        addBotMessage(data.response || "מתנצל, יש לי עומס כרגע.");
-      } catch (e) {
-        addBotMessage("מתנצל, יש לי עומס כרגע.");
-      }
-    } else {
-      setTimeout(() => {
-        addBotMessage(`שאלה מעולה. הכי טוב שתדבר עם דדי: ${COMPANY_INFO.phone}`, [
-            { label: 'וואטסאפ', type: 'whatsapp', value: COMPANY_INFO.phone, icon: MessageCircle }
-        ]);
-      }, 800);
-    }
-  };
 
   const handleVoiceResult = (transcript: string) => {
     setInputValue(transcript);
@@ -354,7 +262,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
 
     // Get chatbot source from settings
     const settings = StorageService.getSettings();
-    const chatbotSource = settings.aiProvider || 'google';
 
     // Try AI or local knowledge base
     if ((settings as any).chatbotSource === 'local' || !settings.aiApiKey) {

@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StorageService } from '../services/storage';
 import { Lead, Product, BlogPost, AppSettings, AIProvider, Campaign, ChatConversation } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
-import { 
-  Trash2, CheckCircle, Save, Plus, LogOut, Settings, LayoutDashboard, 
-  Users, ShoppingBag, FileText, ArrowLeft, Brain, Archive, Clock, 
-  Megaphone, TrendingUp, Calendar, Phone, Mail, MessageCircle, AlertTriangle, X, Search, Pin,
-  Download, RefreshCw, Filter, BarChart3, PieChart as PieChartIcon, Activity, Target, DollarSign
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  Trash2, CheckCircle, Save, Plus, LogOut, Settings, LayoutDashboard,
+  Users, ShoppingBag, FileText, ArrowLeft, Brain, Clock,
+  Megaphone, TrendingUp, Phone, MessageCircle, AlertTriangle, X, Search, Pin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -337,7 +336,7 @@ const AdminPanel: React.FC = () => {
                         <ResponsiveContainer width="100%" height="80%">
                             <PieChart>
                                 <Pie data={leadSourceData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                    {leadSourceData.map((entry, index) => (
+                                    {leadSourceData.map((_, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
