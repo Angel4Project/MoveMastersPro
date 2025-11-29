@@ -310,7 +310,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen: externalIsOpen, onToggle }) =
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-80 sm:w-80 h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4`}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className={`${isDarkMode ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border border-blue-500/30 w-[calc(100vw-2rem)] sm:w-80 max-w-sm h-[calc(100vh-8rem)] sm:h-[500px] rounded-2xl shadow-2xl overflow-hidden flex flex-col mb-4`}
           >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center shadow-lg">
               <div className="flex items-center gap-2">

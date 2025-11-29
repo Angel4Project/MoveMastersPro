@@ -72,7 +72,7 @@ const AdminBar = () => {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-10 bg-slate-900/80 backdrop-blur-md z-[60] flex items-center justify-between px-4 text-xs font-bold text-white border-b border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+    <div className="fixed top-0 left-0 right-0 h-10 bg-slate-900/95 backdrop-blur-md z-[1000] flex items-center justify-between px-4 text-xs font-bold text-white border-b border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
       <div className="flex items-center gap-2">
         <Shield size={14} className="text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.8)]" />
         <span className="tracking-wider">מצב מנהל מערכת פעיל</span>
@@ -89,6 +89,7 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('default');
+  const [isTranslateOpen, setIsTranslateOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
@@ -107,6 +108,24 @@ const NavBar = () => {
     setCurrentTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
+
+  // Close translate dropdown on outside click
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.translate-dropdown')) {
+        setIsTranslateOpen(false);
+      }
+    };
+
+    if (isTranslateOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTranslateOpen]);
 
   const links = [
     { path: '/', label: 'בית', icon: Truck },
@@ -216,35 +235,64 @@ const NavBar = () => {
               <Palette size={18} />
             </button>
 
+            <div className="relative translate-dropdown">
             <button
-              onClick={() => {
-                // Load Google Translate widget
-                if (!document.querySelector('#google-translate-script')) {
-                  const script = document.createElement('script');
-                  script.id = 'google-translate-script';
-                  script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-                  document.head.appendChild(script);
-
-                  window.googleTranslateElementInit = () => {
-                    new window.google.translate.TranslateElement({
-                      pageLanguage: 'he',
-                      includedLanguages: 'en,he,ar,ru,fr,de,es',
-                      layout: (window.google.translate.TranslateElement as any).InlineLayout.SIMPLE
-                    }, 'google_translate_element');
-                  };
-                }
-
-                // Toggle translate widget
-                const translateElement = document.getElementById('google_translate_element');
-                if (translateElement) {
-                  translateElement.style.display = translateElement.style.display === 'none' ? 'block' : 'none';
-                }
-              }}
+              onClick={() => setIsTranslateOpen(!isTranslateOpen)}
               className="p-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300"
               title="תרגום אתר"
             >
               <Languages size={18} />
             </button>
+
+            {isTranslateOpen && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl z-[1000]">
+                  <div className="p-3">
+                    <div className="text-sm font-medium text-white mb-2">בחר שפה</div>
+                    <div className="space-y-1">
+                      {[
+                        { code: 'he', name: 'עברית' },
+                        { code: 'en', name: 'English' },
+                        { code: 'ar', name: 'العربية' },
+                        { code: 'ru', name: 'Русский' },
+                        { code: 'fr', name: 'Français' },
+                        { code: 'es', name: 'Español' }
+                      ].map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            // Load Google Translate widget
+                            if (!document.querySelector('#google-translate-script')) {
+                              const script = document.createElement('script');
+                              script.id = 'google-translate-script';
+                              script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                              document.head.appendChild(script);
+
+                              window.googleTranslateElementInit = () => {
+                                new window.google.translate.TranslateElement({
+                                  pageLanguage: 'he',
+                                  includedLanguages: 'en,he,ar,ru,fr,de,es',
+                                  layout: (window.google.translate.TranslateElement as any).InlineLayout.SIMPLE
+                                }, 'google_translate_element');
+                              };
+                            }
+
+                            // Toggle translate widget
+                            const translateElement = document.getElementById('google_translate_element');
+                            if (translateElement) {
+                              translateElement.style.display = translateElement.style.display === 'none' ? 'block' : 'none';
+                            }
+                            setIsTranslateOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                        >
+                          {lang.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* CTA Button משופר */}
