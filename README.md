@@ -59,7 +59,7 @@
 
 1. **שכפל את הפרויקט**
    ```bash
-   git clone https://github.com/your-username/move-masters-pro.git
+   git clone https://github.com/Angel4Project/MoveMastersPro.git
    cd move-masters-pro
    ```
 
@@ -281,7 +281,7 @@ npm run test:load
   <p>בנוי עם ❤️ בישראל</p>
   <p>
     <a href="https://move-master-pro.vercel.app">🌐 אתר חי</a> •
-    <a href="https://github.com/your-username/move-masters-pro">📦 GitHub</a> •
-    <a href="https://vercel.com/your-username/move-masters-pro">🚀 Vercel</a>
+    <a href="https://github.com/Angel4Project/MoveMastersPro">📦 GitHub</a> •
+    <a href="https://vercel.com/Angel4Project/MoveMastersPro">🚀 Vercel</a>
   </p>
 </div>
